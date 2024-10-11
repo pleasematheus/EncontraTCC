@@ -1,9 +1,7 @@
-/* 1. Rich black:       #001017
-** 2. Rich black:       #0C1D25
-** 3. Charcoal:         #253848
-** 4. Payne's gray:     #30607b
-** 5. Cornflower blue:  #6692ff
-** 6. Seasalt:          #f9f9f9
+/* 1. Mint:         #10B981
+** 2. Eerie black:  #181818
+** 3. Aquamarine:   #6EE7B7
+** 4. Platinum:     #EAEAEA
 */
 
 @import url("switzer.css");
@@ -13,20 +11,18 @@
 @tailwind utilities;
 
 :root {
-  --color-rich-black: #001017;
-  --color-rich-black-2: #0C1D25;
-  --color-charcoal: #253848;
-  --color-paynes-gray: #30607b;
-  --color-cornflower-blue: #6692ff;
-  --color-seasalt: #f9f9f9;
+  --mint: #10B981;
+  --eerie-black: #181818;
+  --aquamarine: #6EE7B7;
+  --platinum: #EAEAEA;
 
   font-family: 'Switzer-Regular', Inter, system-ui;
   line-height: 1.5;
   font-weight: 400;
 
   color-scheme: light dark;
-  color: var(--color-seasalt);
-  background-color: var(--color-rich-black);
+  color: var(--platinum);
+  background-color: var(--eerie-black);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -42,13 +38,13 @@
 }
 
 *::selection {
-  background-color: var(--color-cornflower-blue);
-  color: var(--color-rich-black);
+  background-color: var(--mint);
+  color: var(--platinum);
 }
 
 h1 {
   font-family: 'Switzer-Variable', Inter, system-ui;
   font-size: 5.5rem;
   font-weight: 900;
-  color: var(--color-seasalt);
+  color: var(--platinum);
 }
