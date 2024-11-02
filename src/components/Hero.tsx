@@ -2,7 +2,8 @@ import { useState } from "react"
 import { Dialog, DialogPanel } from "@headlessui/react"
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
 
-import Logo from "../assets/cocktail-logo.png"
+import LogoCocktail from "../assets/cocktail-logo.png"
+import Logo from "../assets/logo.png"
 
 import StaggeredFade from "./StaggeredFadeIn"
 
@@ -24,9 +25,9 @@ export default function Hero() {
           className="flex items-center justify-between p-6 lg:px-8"
         >
           <div className="flex lg:flex-1">
-            <a href="#" className="-m-1.5 p-1.5">
+            <a href="#" className="btn btn-link -m-1.5 p-1.5">
               <span className="sr-only">EncontraTCC</span>
-              <img alt="" src={Logo} className="h-8 w-auto" />
+              <img alt="" src={LogoCocktail} className="h-8 w-auto" />
             </a>
           </div>
           <div className="flex lg:hidden">
@@ -69,7 +70,7 @@ export default function Hero() {
             <div className="flex items-center justify-between">
               <a href="#" className="-m-1.5 p-1.5">
                 <span className="sr-only">EncontraTCC</span>
-                <img alt="" src={Logo} className="h-8 w-auto" />
+                <img alt="" src={LogoCocktail} className="h-8 w-auto" />
               </a>
               <button
                 type="button"
@@ -122,6 +123,7 @@ export default function Hero() {
         </div>
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
+            <img src={Logo} className="place-self-center w-40 h-40" />
             <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
               <StaggeredFade
                 renderText="Facilitamos seu caminho para o TCC ideal"
@@ -135,14 +137,14 @@ export default function Hero() {
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <a
-                href="#"
-                className="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                href="/cadastro"
+                className="btn bg-[#051783] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#3450F7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#020932] active:bg-[#020932]"
               >
                 Inicie
               </a>
               <a
                 href="#"
-                className="text-sm font-semibold leading-6 text-gray-900"
+                className="btn btn-ghost text-sm font-semibold leading-6 text-gray-900"
               >
                 Saiba mais <span aria-hidden="true">→</span>
               </a>
