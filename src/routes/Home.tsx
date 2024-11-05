@@ -7,7 +7,7 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <Footer/>
+      <Footer />
     </main>
   )
 }
