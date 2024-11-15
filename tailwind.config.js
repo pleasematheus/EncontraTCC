@@ -61,6 +61,26 @@ export default {
 		require("tailwindcss-animate")
 	],
 	daisyui: {
-		themes: ["light", "dark"],
+		themes: [{
+			light: {
+				...require("daisyui/src/theming/themes")["light"],
+				'base-100': '#F4F4F4',
+				'base-200': '#EAEAEA',
+				'base-300': '#CECECE',
+				neutral: '#414141',
+				primary: '#10B981',
+				secondary: '#051783',
+				accent: '#E244B5'
+			}, dark: {
+				...require("daisyui/src/theming/themes")["dark"],
+				'base-100': '#0A0A0A',
+				'base-200': '#181818',
+				'base-300': '#2C2C2C',
+				neutral: '#414141',
+				primary: '#10B981',
+				secondary: '#051783',
+				accent: '#E244B5'
+			}
+		}],
 	},
 }

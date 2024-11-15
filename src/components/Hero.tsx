@@ -7,13 +7,6 @@ import Logo from "../assets/logo.png"
 
 import StaggeredFade from "./StaggeredFadeIn"
 
-const navigation = [
-  { name: "Product", href: "#" },
-  { name: "Features", href: "#" },
-  { name: "Marketplace", href: "#" },
-  { name: "Company", href: "#" },
-]
-
 export default function Hero() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
@@ -40,21 +33,10 @@ export default function Hero() {
               <Bars3Icon aria-hidden="true" className="h-6 w-6" />
             </button>
           </div>
-          <div className="hidden lg:flex lg:gap-x-12">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-sm font-semibold leading-6 text-gray-900"
-              >
-                {item.name}
-              </a>
-            ))}
-          </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a
               href="/login"
-              className="text-sm font-semibold leading-6 text-gray-900"
+              className="text-sm font-semibold leading-6"
             >
               Log in <span aria-hidden="true">&rarr;</span>
             </a>
@@ -66,7 +48,7 @@ export default function Hero() {
           className="lg:hidden"
         >
           <div className="fixed inset-0 z-50" />
-          <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-white px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
+          <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-base-100 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
             <div className="flex items-center justify-between">
               <a href="#" className="-m-1.5 p-1.5">
                 <span className="sr-only">EncontraTCC</span>
@@ -83,21 +65,10 @@ export default function Hero() {
             </div>
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
-                <div className="space-y-2 py-6">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
                 <div className="py-6">
                   <a
                     href="/login"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 text-gray-900 hover:bg-gray-50"
+                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 hover:bg-base-200"
                   >
                     Log in
                   </a>
@@ -124,13 +95,13 @@ export default function Hero() {
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
             <img src={Logo} className="place-self-center w-40 h-40" />
-            <h1 className="text-balance text-4xl font-bold tracking-tight text-gray-900 sm:text-6xl">
+            <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-6xl">
               <StaggeredFade
                 renderText="Facilitamos seu caminho para o TCC ideal"
                 renderTime={0.3}
               />
             </h1>
-            <p className="mt-6 text-lg leading-8 text-gray-600">
+            <p className="mt-6 text-lg leading-8">
               Conectamos universidades e estudantes para transformar ideias em
               projetos de TCC de impacto. Facilitamos seu caminho para o TCC
               ideal, com demandas reais e oportunidades que vão te levar longe.
@@ -138,13 +109,13 @@ export default function Hero() {
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <a
                 href="/cadastro"
-                className="btn bg-[#051783] px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#3450F7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#020932] active:bg-[#020932]"
+                className="btn btn-secondary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#3450F7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#020932] active:bg-[#020932]"
               >
-                Inicie
+                Cadastre-se
               </a>
               <a
                 href="#"
-                className="btn btn-ghost text-sm font-semibold leading-6 text-gray-900"
+                className="btn btn-ghost text-sm font-semibold leading-6"
               >
                 Saiba mais <span aria-hidden="true">→</span>
               </a>
