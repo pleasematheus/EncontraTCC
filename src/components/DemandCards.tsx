@@ -1,7 +1,7 @@
 const DemandCards = () => {
   return (
     <div className="py-8 bg-base-200 border-t-[1px] border-base-300">
-      <h2 className="text-center text-2xl font-bold mb-6">Demandas Recentes</h2>
+      <h2 className="text-center text-2xl font-bold mb-6">Exemplo de demandas</h2>
       <div className="flex flex-wrap justify-center gap-6">
         {/* Card 1 */}
         <div className="card w-80 bg-base-100 shadow-xl border border-gray-200">

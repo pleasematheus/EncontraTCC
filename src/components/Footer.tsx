@@ -18,6 +18,10 @@ export default () => {
     setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
   }
 
+  const getFullYear = () => {
+    return new Date().getFullYear()
+  }
+
   return (
     <footer className="footer footer-center text-primary p-10 bg-base-100 border-t-[1px] border-base-300 gap-5 relative bottom-0">
       <aside>
@@ -25,10 +29,10 @@ export default () => {
         <p className="font-bold">
           EncontraTCC
           <br />
-          Ajudando estudantes a encontrar o TCC perfeito desde 2025
+          Ajudando estudantes a encontrar o TCC perfeito desde {getFullYear()}
         </p>
         <p className="">
-          Copyright © {new Date().getFullYear()} - Todos os direitos reservados
+          Copyright © {getFullYear()} - Todos os direitos reservados
         </p>
       </aside>
       <nav>

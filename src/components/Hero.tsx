@@ -94,7 +94,9 @@ export default function Hero() {
         </div>
         <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
           <div className="text-center">
-            <img src={Logo} className="place-self-center w-40 h-40" />
+            <div className="grid">
+              <img src={Logo} className="place-self-center w-40 h-40" />
+            </div>
             <h1 className="text-balance text-4xl font-bold tracking-tight sm:text-6xl">
               <StaggeredFade
                 renderText="Facilitamos seu caminho para o TCC ideal"
