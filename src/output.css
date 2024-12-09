@@ -1162,6 +1162,12 @@ html {
   --bc: 74.6477% 0.0216 264.435964;
 }
 
+.avatar.placeholder > div {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;
@@ -1482,6 +1488,11 @@ html {
   .footer-center {
     grid-auto-flow: row dense;
   }
+}
+
+.form-control {
+  display: flex;
+  flex-direction: column;
 }
 
 .label {
@@ -1937,6 +1948,10 @@ html {
 
 .input[list]::-webkit-calendar-picker-indicator {
   line-height: 1em;
+}
+
+.input-bordered {
+  border-color: var(--fallback-bc,oklch(var(--bc)/0.2));
 }
 
 .input:focus,
@@ -2474,6 +2489,10 @@ html {
   width: 20rem;
 }
 
+.w-96 {
+  width: 24rem;
+}
+
 .w-\[36\.125rem\] {
   width: 36.125rem;
 }
@@ -2782,6 +2801,10 @@ html {
 
 .text-primary {
   color: hsl(var(--primary));
+}
+
+.text-secondary {
+  color: hsl(var(--secondary));
 }
 
 .text-white {

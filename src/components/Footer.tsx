@@ -1,22 +1,10 @@
-import { useState, useEffect } from "react"
+import { useTheme } from "../hooks/useTheme"
 import "../index.css"
 
 import Logo from "@/assets/logo.png"
 
-export default () => {
-  // Estado para armazenar o tema atual
-  const [theme, setTheme] = useState(localStorage.getItem("theme") || "light")
-
-  // Efeito para aplicar o tema sempre que o estado mudar
-  useEffect(() => {
-    document.documentElement.setAttribute("data-theme", theme)
-    localStorage.setItem("theme", theme) // Salva a preferência no localStorage
-  }, [theme])
-
-  // Função para alternar entre os temas
-  const toggleTheme = () => {
-    setTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"))
-  }
+export default function Footer() {
+  const { theme, toggleTheme } = useTheme()
 
   const getFullYear = () => {
     return new Date().getFullYear()
@@ -25,15 +13,13 @@ export default () => {
   return (
     <footer className="footer footer-center text-primary p-10 bg-base-100 border-t-[1px] border-base-300 gap-5 relative bottom-0">
       <aside>
-        <img className="w-20 h-20" src={Logo} />
+        <img className="w-20 h-20" src={Logo} alt="Logo" />
         <p className="font-bold">
           EncontraTCC
           <br />
           Ajudando estudantes a encontrar o TCC perfeito desde {getFullYear()}
         </p>
-        <p className="">
-          Copyright © {getFullYear()} - Todos os direitos reservados
-        </p>
+        <p>Copyright © {getFullYear()} - Todos os direitos reservados</p>
       </aside>
       <nav>
         <a href="#" className="btn btn-ghost">

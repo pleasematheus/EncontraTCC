@@ -1,8 +1,11 @@
 import { Link } from "react-router-dom"
+import { useTheme } from "../hooks/useTheme"
 
 export default function Error404() {
+  const {} = useTheme()
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-base-content">
+    <main className="min-h-screen flex flex-col items-center justify-center bg-base-100 text-base-content">
       <h1 className="text-6xl font-bold text-primary mb-4">404</h1>
       <p className="text-xl text-center font-semibold mb-4 px-3">
         Ops! A página que você está procurando não foi encontrada.
@@ -20,6 +23,6 @@ export default function Error404() {
           className="w-full object-cover p-3"
         />
       </div>
-    </div>
+    </main>
   )
 }
