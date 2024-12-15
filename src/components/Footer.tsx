@@ -1,5 +1,4 @@
 import { useTheme } from "../hooks/useTheme"
-import "../index.css"
 
 import Logo from "@/assets/logo.png"
 

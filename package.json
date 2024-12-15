@@ -1,14 +1,16 @@
 {
   "name": "encontratcc",
   "private": true,
-  "version": "0.13.0",
+  "version": "0.14.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "tailwind": "tailwindcss -i ./src/index.css -o ./src/output.css --watch",
+    "tailwatch": "tailwindcss -i ./src/index.css -o ./src/output.css --watch",
+    "tailpreview": "tailwindcss -i ./src/index.css -o ./src/output.css",
+    "tailbuild": "tailwindcss -i ./src/index.css -o ./src/output.css --minify",
     "devf": "cls && vite && tailwindcss -i ./src/index.css -o ./src/output.css --watch"
   },
   "dependencies": {

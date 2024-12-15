@@ -1,5 +1,4 @@
 import { useTheme } from "../hooks/useTheme"
-import "../index.css"
 
 const LoginPage = () => {
   const {} = useTheme()
