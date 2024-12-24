@@ -1,7 +1,38 @@
-import { useTheme } from "../hooks/useTheme"
+import { useState } from "react"
+import { useNavigate } from "react-router-dom"
+import { supabase } from "../lib/supabaseClient"
 
 const CadastroPage = () => {
-  const {} = useTheme()
+  const [nome, setNome] = useState("")
+  const [email, setEmail] = useState("")
+  const [senha, setSenha] = useState("")
+  const [errorMessage, setErrorMessage] = useState("")
+  const navigate = useNavigate() // Hook para redirecionamento
+
+  const handleCadastro = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setErrorMessage("")
+
+    try {
+      const { error } = await supabase.auth.signUp({
+        email,
+        password: senha,
+        options: {
+          data: {
+            nome,
+          },
+        },
+      })
+
+      if (error) {
+        setErrorMessage("Ocorreu um erro ao cadastrar. Tente novamente.")
+      } else {
+        navigate("/dashboard") // Redireciona para a dashboard
+      }
+    } catch (err) {
+      setErrorMessage("Erro inesperado. Tente novamente.")
+    }
+  }
 
   return (
     <main className="flex items-center justify-center min-h-screen bg-base-100">
@@ -10,7 +41,7 @@ const CadastroPage = () => {
           <h2 className="text-center text-2xl font-bold text-primary">
             Cadastro
           </h2>
-          <form>
+          <form onSubmit={handleCadastro}>
             <div className="form-control w-full">
               <label className="label">
                 <span className="label-text">Nome</span>
@@ -19,6 +50,8 @@ const CadastroPage = () => {
                 type="text"
                 placeholder="Digite seu nome"
                 className="input input-bordered w-full"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
               />
             </div>
             <div className="form-control w-full mt-4">
@@ -29,6 +62,8 @@ const CadastroPage = () => {
                 type="email"
                 placeholder="Digite seu email"
                 className="input input-bordered w-full"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className="form-control w-full mt-4">
@@ -39,9 +74,16 @@ const CadastroPage = () => {
                 type="password"
                 placeholder="Digite sua senha"
                 className="input input-bordered w-full"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
               />
             </div>
-            <button className="btn btn-primary w-full mt-6">Cadastrar</button>
+            {errorMessage && (
+              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+            )}
+            <button type="submit" className="btn btn-primary w-full mt-6">
+              Cadastrar
+            </button>
           </form>
           <div className="text-center mt-4">
             <p className="text-sm">

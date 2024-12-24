@@ -4,6 +4,8 @@ import Home from "./Home"
 import Erro from "./Erro"
 import Login from "./Login"
 import Cadastro from "./Cadastro"
+import Dashboard from "./Dashboard"
+import ProtectedRoute from "../middleware/ProtectedRoute" // Importe o componente de rota protegida
 
 const router = createBrowserRouter([
   {
@@ -13,12 +15,20 @@ const router = createBrowserRouter([
   },
   {
     path: "/login",
-    element: <Login/>
+    element: <Login />,
   },
   {
     path: "/cadastro",
-    element: <Cadastro/>
-  }
+    element: <Cadastro />,
+  },
+  {
+    path: "/dashboard",
+    element: (
+      <ProtectedRoute>
+        <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
 ])
 
 export default function App() {
