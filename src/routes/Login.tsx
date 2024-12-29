@@ -1,8 +1,11 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { supabase } from "../lib/supabaseClient"
+import { useTheme } from "@/hooks/useTheme"
 
 const LoginPage = () => {
+  const { } = useTheme()
+
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const [errorMessage, setErrorMessage] = useState("")

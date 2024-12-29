@@ -1,7 +1,10 @@
 import { useEffect, useState } from "react"
 import { supabase } from "../lib/supabaseClient"
+import { useTheme } from "@/hooks/useTheme"
 
 const Dashboard = () => {
+  const { } = useTheme()
+
   const [userName, setUserName] = useState<string | null>(null)
   const [loading, setLoading] = useState(true)
 
