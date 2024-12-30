@@ -1,10 +1,10 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
-import { supabase } from "../lib/supabaseClient"
 import { useTheme } from "@/hooks/useTheme"
+import supabase from "../utils/supabase"
 
 const CadastroPage = () => {
-  const { } = useTheme()
+  const {} = useTheme()
 
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
@@ -22,7 +22,7 @@ const CadastroPage = () => {
         password: senha,
         options: {
           data: {
-            nome,
+            name: nome,
           },
         },
       })
@@ -30,7 +30,7 @@ const CadastroPage = () => {
       if (error) {
         setErrorMessage("Ocorreu um erro ao cadastrar. Tente novamente.")
       } else {
-        navigate("/dashboard") // Redireciona para a dashboard
+        navigate("/dashboard")
       }
     } catch (err) {
       setErrorMessage("Erro inesperado. Tente novamente.")
