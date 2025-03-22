@@ -1,10 +1,7 @@
-import { useTheme } from "../hooks/useTheme"
-
 import Logo from "@/assets/logo.png"
+import ThemeToggle from "./ToggleTheme"
 
 export default function Footer() {
-  const { theme, toggleTheme } = useTheme()
-
   const getFullYear = () => {
     return new Date().getFullYear()
   }
@@ -25,17 +22,7 @@ export default function Footer() {
           <i className="bi bi-caret-up-fill"></i> Voltar ao topo
         </a>
       </nav>
-      <label className="flex cursor-pointer gap-2">
-        <span className="label-text">Claro</span>
-        <input
-          type="checkbox"
-          value="dark"
-          className="toggle theme-controller"
-          checked={theme === "dark"}
-          onChange={toggleTheme}
-        />
-        <span className="label-text">Escuro</span>
-      </label>
+      <ThemeToggle />
     </footer>
   )
 }

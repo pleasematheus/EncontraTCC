@@ -13,7 +13,7 @@ export default function Error404() {
       <p className="text-lg text-muted mb-8 text-center px-3">
         Verifique o endereço ou volte para a página inicial.
       </p>
-      <Link to="/" className="btn btn-primary">
+      <Link to="/dashboard" className="btn btn-primary">
         Voltar para a Home
       </Link>
       <div className="mt-8 w-4/5 max-w-sm">
