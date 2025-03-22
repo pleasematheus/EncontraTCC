@@ -14,6 +14,7 @@ export default function Header() {
     email: string | undefined
     name: string | undefined
   }>({ email: "", name: "" })
+  {user}
 
   useEffect(() => {
     const getUser = async () => {

@@ -5,7 +5,7 @@ import Erro from "./Erro"
 import Login from "./Login"
 import Cadastro from "./Cadastro"
 import Dashboard from "./Dashboard"
-import ProtectedRoute from "../middleware/ProtectedRoute" // Importe o componente de rota protegida
+// import ProtectedRoute from "../middleware/ProtectedRoute" // Importe o componente de rota protegida
 
 const router = createBrowserRouter([
   {

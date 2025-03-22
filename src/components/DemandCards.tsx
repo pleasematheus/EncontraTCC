@@ -1,7 +1,7 @@
-interface Technology {
-  name: string
-  isPrimary?: boolean
-}
+// interface Technology {
+//   name: string
+//   isPrimary?: boolean
+// }
 
 interface Demand {
   id: number
