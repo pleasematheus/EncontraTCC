@@ -4,7 +4,7 @@ import { useTheme } from "@/hooks/useTheme"
 import supabase from "../utils/supabase"
 
 const LoginPage = () => {
-  const {} = useTheme()
+  const { } = useTheme()
 
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
@@ -22,6 +22,7 @@ const LoginPage = () => {
       })
 
       if (error) {
+        console.error("Erro ao fazer login:", error)
         setErrorMessage("Email ou senha incorretos.")
       } else {
         navigate("/dashboard") // Redireciona para a dashboard

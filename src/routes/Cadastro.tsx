@@ -8,29 +8,25 @@ const CadastroPage = () => {
 
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
-  const [senha, setSenha] = useState("")
+  const [password, setPassword] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate() // Hook para redirecionamento
 
   const handleCadastro = async (e: React.FormEvent) => {
+    console.log("teste")
     e.preventDefault()
     setErrorMessage("")
 
     try {
       const { error } = await supabase.auth.signUp({
         email,
-        password: senha,
-        options: {
-          data: {
-            name: nome,
-          },
-        },
+        password
       })
 
       if (error) {
         setErrorMessage("Ocorreu um erro ao cadastrar. Tente novamente.")
       } else {
-        navigate("/dashboard")
+        navigate("/login")
       }
     } catch (err) {
       setErrorMessage("Erro inesperado. Tente novamente.")
@@ -77,8 +73,8 @@ const CadastroPage = () => {
                 type="password"
                 placeholder="Digite sua senha"
                 className="input input-bordered w-full"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
               />
             </div>
             {errorMessage && (
