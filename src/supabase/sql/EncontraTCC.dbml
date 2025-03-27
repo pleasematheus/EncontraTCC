@@ -1,0 +1,87 @@
+Table Usuarios {
+	id uuid [ pk not null unique ]
+	id_auth_users uuid [ not null ]
+	name varchar [ not null ]
+
+	indexes {
+		(email) [ name: 'Usuarios_index_0' ]
+	}
+}
+
+Table Comunidades {
+	id uuid [ pk not null unique ]
+	nome varchar [ not null ]
+	descricao text
+	total_posts integer [ not null ]
+	total_usuarios integer [ not null ]
+	data_criacao date [ not null ]
+	data_atualizacao date [ not null ]
+
+	indexes {
+		(nome) [ name: 'Comunidades_index_0' ]
+	}
+}
+
+Table usuario_comunidade {
+	id uuid [ pk not null ]
+	id_comunidade integer [ not null ]
+	role varchar [ not null ]
+	id_usuario integer [ increment not null unique ]
+
+	indexes {
+		(id_comunidade) [ name: 'usuario_comunidade_index_0' ]
+		(id_usuario) [ name: 'usuario_comunidade_index_1' ]
+	}
+}
+
+Table Postagens {
+	id uuid [ pk not null unique ]
+	comunidade_id integer [ not null ]
+	titulo varchar [ not null ]
+	descricao text
+	tecnologias varchar [ not null ]
+	prazo date
+	status varchar [ not null ]
+	data_criacao date [ not null ]
+	data_atualizacao date [ not null ]
+
+	indexes {
+		(comunidade_id) [ name: 'Postagens_index_0' ]
+		(titulo) [ name: 'Postagens_index_1' ]
+	}
+}
+
+Table Candidaturas {
+	id uuid [ pk not null unique ]
+	postagem_id integer [ not null ]
+	usuario_id integer [ not null ]
+	data_candidatura date [ not null ]
+	status varchar [ not null ]
+	data_aceitacao date [ not null ]
+	data_saida date [ not null ]
+
+	indexes {
+		(postagem_id) [ name: 'Candidaturas_index_0' ]
+		(usuario_id) [ name: 'Candidaturas_index_1' ]
+	}
+}
+
+Ref usuario_comunidade_id_usuario_fk {
+	usuario_comunidade.id_usuario > Usuarios.id [ delete: no action, on update: no action ]
+}
+
+Ref Candidaturas_usuario_id_fk {
+	Candidaturas.usuario_id > Usuarios.id [ delete: no action, on update: no action ]
+}
+
+Ref Candidaturas_postagem_id_fk {
+	Candidaturas.postagem_id > Postagens.id [ delete: no action, on update: no action ]
+}
+
+Ref Postagens_comunidade_id_fk {
+	Postagens.comunidade_id > Comunidades.id [ delete: cascade, on update: no action ]
+}
+
+Ref usuario_comunidade_id_comunidade_fk {
+	usuario_comunidade.id_comunidade > Comunidades.id [ delete: no action, on update: no action ]
+}
