@@ -18,7 +18,7 @@ export default function StaggeredFade(props: StaggeredFadeInProps) {
   }
   const words = sentence.split(" ")
   return (
-    <motion.h1
+    <motion.span
       initial="hidden"
       animate="visible"
       className={clsx(
@@ -33,6 +33,6 @@ export default function StaggeredFade(props: StaggeredFadeInProps) {
           {word}{" "}
         </motion.span>
       ))}
-    </motion.h1>
+    </motion.span>
   )
 }

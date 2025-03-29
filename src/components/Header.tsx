@@ -2,19 +2,23 @@ import { useTheme } from "../hooks/useTheme"
 import { useNavigate } from "react-router-dom"
 import supabase from "@/utils/supabase"
 import Logo from "@/assets/cocktail-logo.png"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
 export default function Header() {
   const {} = useTheme()
   const navigate = useNavigate()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
+  const profileMenuRef = useRef<HTMLDivElement>(null)
 
   const [user, setUser] = useState<{
     email: string | undefined
     name: string | undefined
   }>({ email: "", name: "" })
-  {user}
+  {
+    user
+  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -33,6 +37,23 @@ export default function Header() {
     getUser()
   }, [])
 
+  useEffect(() => {
+    // Fechar o menu de perfil ao clicar fora dele
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsProfileMenuOpen(false)
+      }
+    }
+
+    document.addEventListener("mousedown", handleClickOutside)
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside)
+    }
+  }, [])
+
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut()
@@ -46,6 +67,10 @@ export default function Header() {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  const toggleProfileMenu = () => {
+    setIsProfileMenuOpen(!isProfileMenuOpen)
+  }
+
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     if (searchQuery.trim()) {
@@ -57,10 +82,10 @@ export default function Header() {
 
   return (
     <header className="navbar bg-base-100 shadow-sm">
-      <div className="container mx-auto">
+      <div className="container mx-auto gap-2 flex items-center justify-between">
         {/* Logo - sempre visível */}
         <div className="flex-none">
-          <a href="/" className="flex items-center gap-2 text-lg font-bold">
+          <a href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
             <img className="w-10 h-10" src={Logo} alt="Logo" />
             <span className="hidden sm:inline">EncontraTCC</span>
           </a>
@@ -102,7 +127,7 @@ export default function Header() {
         <div className="flex md:hidden">
           <button
             onClick={toggleMenu}
-            className="p-2 rounded-md hover:bg-base-200 focus:outline-none"
+            className="p-2 rounded-md hover:bg-base-200 focus:outline-none btn btn-ghost"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -144,8 +169,8 @@ export default function Header() {
               </a>
             </li>
             <li>
-              <a href="/novos" className="btn btn-ghost btn-sm">
-                Novos
+              <a href="/comunidades" className="btn btn-ghost btn-sm">
+                Comunidades
               </a>
             </li>
             <li>
@@ -156,14 +181,62 @@ export default function Header() {
           </ul>
         </nav>
 
-        {/* Botão de Logout - visível em telas médias e grandes */}
-        <div className="hidden md:flex md:flex-none ml-2">
+        {/* Botão de Perfil - visível em telas médias e grandes */}
+        <div
+          className="hidden md:flex md:flex-none ml-2 relative"
+          ref={profileMenuRef}
+        >
           <button
-            onClick={handleLogout}
-            className="px-3 py-1.5 font-semibold text-white transition-colors bg-red-500 rounded-full hover:bg-red-600 text-sm"
+            onClick={toggleProfileMenu}
+            className="flex items-center gap-2 px-3 py-1.5 font-medium transition-colors bg-base-200 rounded-full hover:bg-base-300 text-sm"
           >
-            Sair
+            <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center">
+              {user.name?.[0]?.toUpperCase() || "U"}
+            </div>
+            <span className="md:hidden lg:block">{user.name}</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              className={`transition-transform ${
+                isProfileMenuOpen ? "rotate-180" : ""
+              }`}
+            >
+              <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
           </button>
+
+          {/* Menu de Perfil Dropdown */}
+          {isProfileMenuOpen && (
+            <div className="absolute right-0 top-full mt-2 w-56 rounded-[10px] shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50">
+              <div className="py-1">
+                <div className="px-4 py-2 text-sm text-base-content border-b border-base-300">
+                  <div className="font-medium">{user.name}</div>
+                  <div className="text-xs text-base-content/70 truncate">
+                    {user.email}
+                  </div>
+                </div>
+                <a
+                  href="/perfil"
+                  className="block px-4 py-2 text-sm hover:bg-base-200 btn btn-ghost text-left"
+                >
+                  Meu perfil
+                </a>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-base-200 btn btn-ghost"
+                >
+                  Sair
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
@@ -174,12 +247,25 @@ export default function Header() {
         }`}
       >
         <div className="container mx-auto p-4">
+          {/* Informações do usuário mobile */}
+          <div className="flex items-center gap-3 mb-4 p-3 bg-base-200 rounded-lg">
+            <div className="h-10 w-10 rounded-full bg-primary flex items-center justify-center text-lg">
+              {user.name?.[0]?.toUpperCase() || "U"}
+            </div>
+            <div>
+              <div className="font-medium">{user.name}</div>
+              <div className="text-xs text-base-content/70 truncate">
+                {user.email}
+              </div>
+            </div>
+          </div>
+
           {/* Barra de pesquisa mobile arredondada */}
           <form onSubmit={handleSearch} className="relative mb-4">
             <input
               type="text"
               placeholder="Buscar TCCs, orientadores, temas..."
-              className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300"
+              className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 sm:hidden"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
@@ -223,10 +309,10 @@ export default function Header() {
             </li>
             <li>
               <a
-                href="/novos"
+                href="/comunidades"
                 className="block py-2 px-4 hover:bg-base-200 rounded-full"
               >
-                Novos
+                Comunidades
               </a>
             </li>
             <li>
@@ -235,6 +321,14 @@ export default function Header() {
                 className="block py-2 px-4 hover:bg-base-200 rounded-full"
               >
                 Minhas candidaturas
+              </a>
+            </li>
+            <li>
+              <a
+                href="/perfil"
+                className="block py-2 px-4 hover:bg-base-200 rounded-full"
+              >
+                Meu perfil
               </a>
             </li>
             <li className="border-t border-base-300 mt-2 pt-2">
