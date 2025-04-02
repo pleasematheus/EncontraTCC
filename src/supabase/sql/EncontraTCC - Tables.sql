@@ -1,20 +1,23 @@
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   "Usuarios" (
     "id" UUID NOT NULL UNIQUE,
     "id_auth_users" UUID NOT NULL,
     "nome" VARCHAR(255) NOT NULL,
     "id_publico" SERIAL UNIQUE,
     "email" VARCHAR(255) NOT NULL,
+    "ativo" BOOLEAN NOT NULL,
     PRIMARY KEY ("id")
   );
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   "Comunidades" (
     "id" UUID NOT NULL UNIQUE,
     "nome" VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(NOME) >= 3),
     "descricao" TEXT,
+    "descricao_vector" TS_VECTOR NOT NULL,
+    "id_usuario_criador" UUID NOT NULL,
     "total_posts" INTEGER NOT NULL,
     "total_usuarios" INTEGER NOT NULL,
     "data_criacao" TIMESTAMP NOT NULL,
@@ -22,9 +25,9 @@ CREATE TABLE
     PRIMARY KEY ("id")
   );
 
-CREATE INDEX "Comunidades_index_0" ON "Comunidades" ("nome");
+CREATE INDEX idx_comunidades_nome ON "Comunidades" ("nome");
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   "usuario_comunidade" (
     "id" UUID NOT NULL,
     "id_comunidade" UUID NOT NULL,
@@ -33,16 +36,17 @@ CREATE TABLE
     PRIMARY KEY ("id")
   );
 
-CREATE INDEX "usuario_comunidade_index_0" ON "usuario_comunidade" ("id_comunidade");
+CREATE INDEX idx_usuario_comunidade_id ON "usuario_comunidade" ("id_comunidade");
 
-CREATE INDEX "usuario_comunidade_index_1" ON "usuario_comunidade" ("id_usuario");
+CREATE INDEX idx_usuario_comunidade_id_usuario ON "usuario_comunidade" ("id_usuario");
 
-CREATE TABLE
+CREATE TABLE IF NOT EXISTS
   "Postagens" (
     "id" UUID NOT NULL UNIQUE,
     "comunidade_id" UUID NOT NULL,
     "titulo" VARCHAR(255) NOT NULL CHECK (CHAR_LENGTH(TITULO) >= 3),
     "descricao" TEXT,
+    "descricao_vector" TS_VECTOR NOT NULL,
     "tecnologias" VARCHAR(255) ARRAY NOT NULL,
     "prazo" TIMESTAMP,
     "status" VARCHAR(20) NOT NULL,
@@ -51,13 +55,17 @@ CREATE TABLE
     PRIMARY KEY ("id")
   );
 
-CREATE INDEX "Postagens_index_0" ON "Postagens" ("comunidade_id");
+CREATE INDEX idx_postagens_comunidade_id ON "Postagens" ("comunidade_id");
 
-CREATE INDEX "Postagens_index_1" ON "Postagens" ("titulo");
+CREATE INDEX idx_postagens_titulo ON "Postagens" ("titulo");
 
 CREATE INDEX idx_postagens_tecnologias ON "Postagens" USING GIN ("tecnologias");
 
-CREATE TABLE
+CREATE INDEX idx_postagens_status ON "Postagens" ("status");
+
+CREATE INDEX idx_postagens_descricao_vector ON "Postagens" USING GIN ("descricao_vector");
+
+CREATE TABLE IF NOT EXISTS
   "Candidaturas" (
     "id" UUID NOT NULL UNIQUE,
     "postagem_id" UUID NOT NULL,
@@ -69,9 +77,11 @@ CREATE TABLE
     PRIMARY KEY ("id")
   );
 
-CREATE INDEX "Candidaturas_index_0" ON "Candidaturas" ("postagem_id");
+CREATE INDEX idx_candidaturas_postagem_id ON "Candidaturas" ("postagem_id");
 
-CREATE INDEX "Candidaturas_index_1" ON "Candidaturas" ("usuario_id");
+CREATE INDEX idx_candidaturas_usuario_id ON "Candidaturas" ("usuario_id");
+
+CREATE INDEX idx_candidaturas_status ON "Candidaturas" ("status");
 
 ALTER TABLE "Usuarios" ADD FOREIGN KEY ("id_auth_users") REFERENCES auth.users (id) ON UPDATE NO ACTION ON DELETE NO ACTION;
 
@@ -86,3 +96,5 @@ ALTER TABLE "Candidaturas" ADD FOREIGN KEY ("postagem_id") REFERENCES "Postagens
 ALTER TABLE "Postagens" ADD FOREIGN KEY ("comunidade_id") REFERENCES "Comunidades" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;
 
 ALTER TABLE "usuario_comunidade" ADD FOREIGN KEY ("id_comunidade") REFERENCES "Comunidades" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+
+ALTER TABLE "Comunidades" ADD FOREIGN KEY ("id_usuario_criador") REFERENCES "Usuarios" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
