@@ -1,31 +1,55 @@
 import { useState } from "react"
 import { useNavigate } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
-import supabase from "../utils/supabase"
+import supabase from "@/utils/supabase"
+
+// Tipo para os roles disponíveis
+type Role = "Discente" | "Docente"
 
 const CadastroPage = () => {
   const {} = useTheme()
-
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [role, setRole] = useState<Role>("Discente") // Estado para o role selecionado
   const [errorMessage, setErrorMessage] = useState("")
   const navigate = useNavigate() // Hook para redirecionamento
 
   const handleCadastro = async (e: React.FormEvent) => {
-    console.log("teste")
     e.preventDefault()
     setErrorMessage("")
-
     try {
-      const { error } = await supabase.auth.signUp({
+      // Cadastro do usuário com email e senha
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
-        password
+        password,
       })
 
-      if (error) {
+      if (authError) {
         setErrorMessage("Ocorreu um erro ao cadastrar. Tente novamente.")
-      } else {
+        return
+      }
+
+      // Se o cadastro foi bem-sucedido, adicionar os dados adicionais (nome e role) na tabela Usuarios
+      if (authData.user) {
+        const { error: profileError } = await supabase
+          .from("Usuarios") // Usando a tabela Usuarios do esquema public
+          .insert([
+            {
+              id_auth_user: authData.user.id,
+              nome: nome,
+              role: role,
+            },
+          ])
+
+        if (profileError) {
+          setErrorMessage(
+            "Erro ao salvar informações de perfil. Tente novamente."
+          )
+          return
+        }
+
+        // Redireciona para a página de login após o cadastro bem-sucedido
         navigate("/login")
       }
     } catch (err) {
@@ -51,6 +75,7 @@ const CadastroPage = () => {
                 className="input input-bordered w-full"
                 value={nome}
                 onChange={(e) => setNome(e.target.value)}
+                required
               />
             </div>
             <div className="form-control w-full mt-4">
@@ -63,6 +88,7 @@ const CadastroPage = () => {
                 className="input input-bordered w-full"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                required
               />
             </div>
             <div className="form-control w-full mt-4">
@@ -75,7 +101,22 @@ const CadastroPage = () => {
                 className="input input-bordered w-full"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                required
               />
+            </div>
+            <div className="form-control w-full mt-4">
+              <label className="label">
+                <span className="label-text">Tipo de Usuário</span>
+              </label>
+              <select
+                className="select select-bordered w-full"
+                value={role}
+                onChange={(e) => setRole(e.target.value as Role)}
+                required
+              >
+                <option value="Discente">Discente</option>
+                <option value="Docente">Docente</option>
+              </select>
             </div>
             {errorMessage && (
               <p className="text-red-500 text-sm mt-2">{errorMessage}</p>

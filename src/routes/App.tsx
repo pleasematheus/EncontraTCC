@@ -6,6 +6,7 @@ import Login from "./Login"
 import Cadastro from "./Cadastro"
 import Dashboard from "./Dashboard"
 import ProtectedRoute from "../middleware/ProtectedRoute"
+import Profile from "./Profile"
 
 const router = createBrowserRouter([
   {
@@ -26,6 +27,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <Dashboard />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/perfil",
+    element: (
+      <ProtectedRoute>
+        <Profile />
       </ProtectedRoute>
     ),
   },

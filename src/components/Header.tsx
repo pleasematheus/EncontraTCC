@@ -16,9 +16,6 @@ export default function Header() {
     email: string | undefined
     name: string | undefined
   }>({ email: "", name: "" })
-  {
-    user
-  }
 
   useEffect(() => {
     const getUser = async () => {
@@ -85,7 +82,10 @@ export default function Header() {
       <div className="container mx-auto gap-2 flex items-center justify-between">
         {/* Logo - sempre visível */}
         <div className="flex-none">
-          <a href="/dashboard" className="flex items-center gap-2 text-lg font-bold">
+          <a
+            href="/dashboard"
+            className="flex items-center gap-2 text-lg font-bold"
+          >
             <img className="w-10 h-10" src={Logo} alt="Logo" />
             <span className="hidden sm:inline">EncontraTCC</span>
           </a>
@@ -215,7 +215,7 @@ export default function Header() {
           {/* Menu de Perfil Dropdown */}
           {isProfileMenuOpen && (
             <div className="absolute right-0 top-full mt-2 w-56 rounded-[10px] shadow-lg bg-base-200 ring-1 ring-black ring-opacity-5 z-50">
-              <div className="py-1">
+              <div className="flex flex-col p-1 gap-2">
                 <div className="px-4 py-2 text-sm text-base-content border-b border-base-300">
                   <div className="font-medium">{user.name}</div>
                   <div className="text-xs text-base-content/70 truncate">
@@ -224,13 +224,13 @@ export default function Header() {
                 </div>
                 <a
                   href="/perfil"
-                  className="block px-4 py-2 text-sm hover:bg-base-200 btn btn-ghost text-left"
+                  className="px-4 py-2 text-sm hover:bg-base-300 btn btn-ghost text-left inline-block align-middle"
                 >
                   Meu perfil
                 </a>
                 <button
                   onClick={handleLogout}
-                  className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-base-200 btn btn-ghost"
+                  className="block w-full text-left px-4 py-2 text-sm text-red-500 hover:bg-base-300 btn btn-ghost"
                 >
                   Sair
                 </button>

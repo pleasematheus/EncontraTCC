@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import { useTheme } from "@/hooks/useTheme"
-import Header from "../components/Header"
+import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import supabase from "@/utils/supabase"
 
@@ -52,7 +52,9 @@ const Dashboard = () => {
       <>
         <Header />
         <main className="flex flex-col items-center justify-center min-h-screen gap-4 bg-base-100">
-          <p>Carregando...</p>
+          <div className="flex items-center justify-center">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
         </main>
         <Footer />
       </>
@@ -65,7 +67,6 @@ const Dashboard = () => {
       <main className="flex flex-col items-center justify-center min-h-screen gap-4 bg-base-100">
         <div className="text-center">
           <h1 className="text-3xl font-bold">Bem-vindo à Dashboard!</h1>
-
           <div className="mt-4 space-y-2">
             <p className="text-lg">
               <span className="font-semibold">Nome:</span>{" "}
