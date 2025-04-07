@@ -8,7 +8,7 @@ export default function Home() {
   // Dados dos cards definidos no componente pai
   const demandsData = [
     {
-      id: 1,
+      id: "1",
       title: "Sistema de Gestão Escolar",
       institution: "Universidade Federal de Nova Esperança",
       description:
@@ -16,7 +16,7 @@ export default function Home() {
       type: "Projeto",
     },
     {
-      id: 2,
+      id: "2",
       title: "App para Controle de Estoque",
       institution: "Universidade Estadual de Monte Verde",
       description:
@@ -24,7 +24,7 @@ export default function Home() {
       type: "Projeto",
     },
     {
-      id: 3,
+      id: "3",
       title: "Plataforma de Cursos Online",
       institution: "Universidade Online de Horizonte Azul",
       description:
