@@ -18,13 +18,14 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE OR REPLACE FUNCTION public.insert_usuario(
+CREATE OR REPLACE FUNCTION public.sp_insert_usuario(
   id_auth uuid,
   nome_input text,
   email_input text,
   tipo_input text
 )
 RETURNS void
+SET search_path = public
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
@@ -34,7 +35,7 @@ BEGIN
 END;
 $$;
 
-GRANT EXECUTE ON FUNCTION public.insert_usuario(uuid, text, text, text) TO anon;
+GRANT EXECUTE ON FUNCTION public.sp_insert_usuario(uuid, text, text, text) TO anon;
 
 CREATE TRIGGER trg_insert_description_vector
 BEFORE INSERT OR UPDATE ON public."Comunidades"

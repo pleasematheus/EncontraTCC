@@ -48,7 +48,7 @@ const CadastroPage = () => {
       //   },
       // ])
 
-      const { error: insertError } = await supabase.rpc("insert_usuario", {
+      const { error: insertError } = await supabase.rpc("sp_insert_usuario", {
         id_auth: userId,
         nome_input: nome,
         email_input: email,
