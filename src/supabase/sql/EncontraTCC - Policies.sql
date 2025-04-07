@@ -1,3 +1,17 @@
+-- Permitir que os usuários vejam apenas seus próprios dados
+CREATE POLICY "Allow users to read their own information" 
+ON public."Usuarios" 
+FOR SELECT 
+TO authenticated 
+USING ((select auth.uid()) = id_auth_users);
+
+-- Permitir que os usuários insiram dados
+CREATE POLICY "Allow users to insert their own profile" 
+ON public."Usuarios" 
+FOR INSERT 
+TO authenticated 
+WITH CHECK (auth.uid() IS NOT NULL);
+
 -- Permite que os usuários atualizem seus próprios perfis
 CREATE POLICY "Allow users to update their own profile"
 ON public."Usuarios"
