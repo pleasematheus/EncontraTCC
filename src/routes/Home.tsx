@@ -13,7 +13,7 @@ export default function Home() {
       institution: "Universidade Federal de Nova Esperança",
       description:
         "Criação de um sistema web para gerenciar alunos, professores e turmas.",
-      technologies: ["React", "Node.js"],
+      type: "Projeto",
     },
     {
       id: 2,
@@ -21,7 +21,7 @@ export default function Home() {
       institution: "Universidade Estadual de Monte Verde",
       description:
         "Desenvolvimento de um app para pequenos comércios gerenciarem estoques.",
-      technologies: ["Vue.js", "Laravel"],
+      type: "Projeto",
     },
     {
       id: 3,
@@ -29,7 +29,7 @@ export default function Home() {
       institution: "Universidade Online de Horizonte Azul",
       description:
         "Criação de uma plataforma para disponibilização de cursos e avaliações.",
-      technologies: ["Angular", "Firebase"],
+      type: "Projeto",
     },
   ]
 

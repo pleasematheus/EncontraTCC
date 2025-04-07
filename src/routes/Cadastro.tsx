@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
 import supabase from "@/utils/supabase"
 
-// Tipo para os roles disponíveis
 type Role = "Discente" | "Docente"
 
 const CadastroPage = () => {
@@ -11,48 +10,61 @@ const CadastroPage = () => {
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
-  const [role, setRole] = useState<Role>("Discente") // Estado para o role selecionado
+  const [role, setRole] = useState<Role>("Discente")
   const [errorMessage, setErrorMessage] = useState("")
-  const navigate = useNavigate() // Hook para redirecionamento
+  const navigate = useNavigate()
 
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage("")
+
     try {
-      // Cadastro do usuário com email e senha
+      // 1. Cria o usuário no Supabase Auth
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
       })
 
       if (authError) {
-        setErrorMessage("Ocorreu um erro ao cadastrar. Tente novamente.")
+        setErrorMessage("Erro ao cadastrar: " + authError.message)
         return
       }
 
-      // Se o cadastro foi bem-sucedido, adicionar os dados adicionais (nome e role) na tabela Usuarios
-      if (authData.user) {
-        const { error: profileError } = await supabase
-          .from("Usuarios") // Usando a tabela Usuarios do esquema public
-          .insert([
-            {
-              id_auth_user: authData.user.id,
-              nome: nome,
-              role: role,
-            },
-          ])
+      const userId = authData.user?.id
 
-        if (profileError) {
-          setErrorMessage(
-            "Erro ao salvar informações de perfil. Tente novamente."
-          )
-          return
-        }
-
-        // Redireciona para a página de login após o cadastro bem-sucedido
-        navigate("/login")
+      if (!userId) {
+        setErrorMessage("Não foi possível obter o ID do usuário.")
+        return
       }
-    } catch (err) {
+
+      // 2. Insere os dados adicionais na tabela Usuarios
+      // const { error: insertError } = await supabase.from("Usuarios").upsert([
+      //   {
+      //     id_auth_users: userId,
+      //     nome,
+      //     email,
+      //     tipo: role,
+      //     ativo: true,
+      //   },
+      // ])
+
+      const { error: insertError } = await supabase.rpc("insert_usuario", {
+        id_auth: userId,
+        nome_input: nome,
+        email_input: email,
+        tipo_input: role,
+      })
+
+
+      if (insertError) {
+        setErrorMessage("Erro ao salvar perfil: " + insertError.message)
+        return
+      }
+
+      // 3. Redireciona para login
+      navigate("/login")
+    } catch (err: any) {
+      console.error("Erro inesperado:", err)
       setErrorMessage("Erro inesperado. Tente novamente.")
     }
   }

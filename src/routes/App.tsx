@@ -7,6 +7,7 @@ import Cadastro from "./Cadastro"
 import Dashboard from "./Dashboard"
 import ProtectedRoute from "../middleware/ProtectedRoute"
 import Profile from "./Profile"
+import Comunidades from "./Comunidades"
 
 const router = createBrowserRouter([
   {
@@ -38,6 +39,14 @@ const router = createBrowserRouter([
       </ProtectedRoute>
     ),
   },
+  {
+    path: "/comunidades",
+    element: (
+      <ProtectedRoute>
+        <Comunidades />
+      </ProtectedRoute>
+    ),
+  }
 ])
 
 export default function App() {

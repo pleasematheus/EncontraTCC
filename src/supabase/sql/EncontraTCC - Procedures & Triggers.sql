@@ -1,19 +1,3 @@
-CREATE OR REPLACE FUNCTION public.sp_insert_usuarios_from_auth_users()
-RETURNS TRIGGER
-SET search_path = public, auth
-AS $$
-BEGIN
-  INSERT INTO public."Usuarios" (id, id_auth_users, name, email)
-  VALUES (
-    gen_random_uuid(),
-    NEW.id,                                 -- Id de auth.users
-    UPPER(LEFT(md5(random()::text), 9)),    -- Sequência alfanumérica de 9 caracteres
-    NEW.email                               -- Email de auth.users para evitar joins desnecessários
-  );
-  RETURN NEW;
-END;
-$$ LANGUAGE plpgsql;
-
 CREATE OR REPLACE FUNCTION public.sp_insert_description_vector()
 RETURNS TRIGGER
 SET search_path = public
@@ -34,10 +18,23 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
-CREATE TRIGGER trg_insert_usuarios_on_auth_users
-AFTER INSERT ON auth.users
-FOR EACH ROW
-EXECUTE FUNCTION public.sp_insert_usuarios_from_auth_users();
+CREATE OR REPLACE FUNCTION public.insert_usuario(
+  id_auth uuid,
+  nome_input text,
+  email_input text,
+  tipo_input text
+)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  INSERT INTO public."Usuarios"(id_auth_users, nome, email, tipo, ativo)
+  VALUES (id_auth, nome_input, email_input, tipo_input, true);
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.insert_usuario(uuid, text, text, text) TO anon;
 
 CREATE TRIGGER trg_insert_description_vector
 BEFORE INSERT OR UPDATE ON public."Comunidades"
@@ -48,4 +45,4 @@ CREATE TRIGGER trg_after_auth_users_update
 AFTER UPDATE ON auth.users
 FOR EACH ROW
 WHEN (OLD.email IS DISTINCT FROM NEW.email)
-EXECUTE FUNCTION public.sync_usuario_email();
+EXECUTE FUNCTION public.sp_sync_usuario_email();

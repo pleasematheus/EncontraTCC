@@ -8,24 +8,47 @@ const Profile = () => {
   const {} = useTheme()
   const [user, setUser] = useState<{
     email: string | undefined
-    name: string | undefined
-  }>({ email: "", name: "" })
+    nome: string | undefined
+    tipo: string | undefined
+  }>({
+    email: "",
+    nome: "",
+    tipo: "",
+  })
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     const getUser = async () => {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession()
+      try {
+        const {
+          data: { session },
+          error: sessionError,
+        } = await supabase.auth.getSession()
 
-      if (session?.user) {
+        if (sessionError) throw sessionError
+
+        const userId = session?.user?.id
+
+        if (!userId) throw new Error("Usuário não autenticado")
+
+        const { data: usuario, error: usuarioError } = await supabase
+          .from("Usuarios")
+          .select("nome, email, tipo")
+          .eq("id_auth_users", userId)
+          .single()
+
+        if (usuarioError) throw usuarioError
+
         setUser({
-          email: session.user.email,
-          name: session.user.user_metadata?.name || "Usuário",
+          email: usuario?.email,
+          nome: usuario?.nome,
+          tipo: usuario?.tipo,
         })
+      } catch (error) {
+        console.error("Erro ao buscar dados do usuário:", error)
+      } finally {
+        setLoading(false)
       }
-
-      setLoading(false)
     }
 
     getUser()
@@ -40,17 +63,18 @@ const Profile = () => {
             <span className="loading loading-spinner loading-lg"></span>
           </div>
         ) : (
-          <div className="grid grid-cols-1 gap-2 border-2 divide-y divide-inherit border-base-300 p-4 rounded-lg shadow-lg sm:w-1/2 w-5/6 max-w-sm">
+          <div className="grid grid-cols-1 gap-6 border-2 divide-y divide-inherit border-base-300 p-4 rounded-lg shadow-lg sm:w-1/2 w-5/6 max-w-sm my-2">
             <h1 className="text-2xl font-bold place-self-center">Perfil</h1>
             <div className="avatar placeholder pb-2 place-self-center">
               <div className="bg-neutral text-neutral-content w-24 rounded-full mt-2">
                 <span className="text-3xl">
-                  {user.name?.charAt(0)?.toUpperCase() || "?"}
+                  {user.nome?.charAt(0)?.toUpperCase() || "?"}
                 </span>
               </div>
             </div>
-            <h1 className="text-left">Nome: {user.name}</h1>
+            <h1 className="text-left">Nome: {user.nome}</h1>
             <p>Email: {user.email}</p>
+            <p>Tipo: {user.tipo}</p>
           </div>
         )}
       </div>

@@ -1,4 +1,4 @@
-import { useTheme } from "../hooks/useTheme"
+import { useTheme } from "@/hooks/useTheme"
 import { useNavigate } from "react-router-dom"
 import supabase from "@/utils/supabase"
 import Logo from "@/assets/cocktail-logo.png"
@@ -15,19 +15,40 @@ export default function Header() {
   const [user, setUser] = useState<{
     email: string | undefined
     name: string | undefined
-  }>({ email: "", name: "" })
+    userId: string | undefined
+  }>({ email: "", name: "", userId: "" })
 
   useEffect(() => {
     const getUser = async () => {
+      // Obter sessão do usuário autenticado
       const {
         data: { session },
       } = await supabase.auth.getSession()
 
       if (session?.user) {
-        setUser({
-          email: session.user.email,
-          name: session.user.user_metadata?.name || "Usuário",
-        })
+        // Usar o ID do usuário autenticado para buscar informações na tabela Usuarios
+        const { data: usuarioData, error } = await supabase
+          .from("Usuarios")
+          .select("nome, email")
+          .eq("id_auth_users", session.user.id)
+          .single()
+
+        if (error) {
+          console.error("Erro ao buscar dados do usuário:", error)
+          // Fallback para os dados de auth caso não encontre na tabela Usuarios
+          setUser({
+            email: session.user.email,
+            name: session.user.user_metadata?.name || "Usuário",
+            userId: session.user.id,
+          })
+        } else {
+          // Usar os dados da tabela Usuarios
+          setUser({
+            email: usuarioData.email,
+            name: usuarioData.nome,
+            userId: session.user.id,
+          })
+        }
       }
     }
 
@@ -265,7 +286,7 @@ export default function Header() {
             <input
               type="text"
               placeholder="Buscar TCCs, orientadores, temas..."
-              className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 sm:hidden"
+              className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 md:hidden"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
