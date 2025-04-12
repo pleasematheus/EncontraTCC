@@ -30,9 +30,15 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+  IF EXISTS (
+    SELECT 1 FROM public."Usuarios" WHERE email = email_input
+  ) THEN
+    RAISE EXCEPTION 'Já existe um usuário com este e-mail.';
+  END IF;
+
   INSERT INTO public."Usuarios"(id_auth_users, nome, email, tipo, ativo)
   VALUES (id_auth, nome_input, email_input, tipo_input, true);
-END;
+END; 
 $$;
 
 GRANT EXECUTE ON FUNCTION public.sp_insert_usuario(uuid, text, text, text) TO anon;
