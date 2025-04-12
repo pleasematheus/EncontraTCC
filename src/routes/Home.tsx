@@ -4,9 +4,17 @@ import DemandCards from "@/components/DemandCards"
 import Footer from "@/components/Footer"
 import Hero from "@/components/Hero"
 
+interface Demand {
+  id: string
+  title: string
+  institution: string
+  type: string
+  description: string
+}
+
 export default function Home() {
-  // Dados dos cards definidos no componente pai
-  const demandsData = [
+  // Dados dos cards
+  const demandsData: Demand[] = [
     {
       id: "1",
       title: "Sistema de Gestão Escolar",
