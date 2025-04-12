@@ -1,12 +1,14 @@
 import { ReactNode, useEffect, useState } from "react"
 import { Navigate } from "react-router-dom"
-import supabase from "../utils/supabase"
+import supabase from "@/utils/supabase"
+import { useTheme } from "@/hooks/useTheme"
 
 interface ProtectedRouteProps {
   children: ReactNode
 }
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+  const {} = useTheme()
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false)
   const [loading, setLoading] = useState<boolean>(true)
 
@@ -42,7 +44,12 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
 
   if (loading) {
     // Você pode substituir isso por um componente de loading mais elaborado
-    return <div>Carregando...</div>
+    return (
+      <div className="flex flex-col items-center justify-center h-screen">
+        <span className="loading loading-spinner loading-lg"></span>
+        <span>Carregando...</span>
+      </div>
+    )
   }
 
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />

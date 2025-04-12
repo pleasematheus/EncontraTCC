@@ -117,7 +117,7 @@ export default function Header() {
           <form onSubmit={handleSearch} className="relative w-full max-w-md">
             <input
               type="text"
-              placeholder="Buscar TCCs, orientadores, temas..."
+              placeholder="Buscar postagens ou comunidades"
               className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
@@ -285,7 +285,7 @@ export default function Header() {
           <form onSubmit={handleSearch} className="relative mb-4">
             <input
               type="text"
-              placeholder="Buscar TCCs, orientadores, temas..."
+              placeholder="Buscar postagens ou comunidades"
               className="w-full px-4 py-2 pr-10 border rounded-full focus:outline-none focus:ring-2 focus:ring-primary bg-base-200 border-base-300 md:hidden"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}

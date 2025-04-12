@@ -18,8 +18,8 @@ CREATE TABLE IF NOT EXISTS "Comunidades" (
   "id_usuario_criador" UUID NOT NULL,
   "total_posts" INTEGER NOT NULL,
   "total_usuarios" INTEGER NOT NULL,
-  "data_criacao" TIMESTAMP NOT NULL,
-  "data_atualizacao" TIMESTAMP NOT NULL,
+  "data_criacao" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "data_atualizacao" TIMESTAMP,
   PRIMARY KEY ("id")
 );
 
@@ -45,8 +45,8 @@ CREATE TABLE IF NOT EXISTS "Postagens" (
   "tipo" VARCHAR(255) NOT NULL,
   "prazo" TIMESTAMP,
   "status" VARCHAR(20) NOT NULL,
-  "data_criacao" TIMESTAMP NOT NULL,
-  "data_atualizacao" TIMESTAMP NOT NULL,
+  "data_criacao" TIMESTAMP NOT NULL DEFAULT NOW(),
+  "data_atualizacao" TIMESTAMP,
   PRIMARY KEY ("id")
 );
 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS "Candidaturas" (
   "data_candidatura" TIMESTAMP NOT NULL,
   "status" VARCHAR(20) NOT NULL,
   "data_aceitacao" TIMESTAMP NOT NULL,
-  "data_saida" TIMESTAMP NOT NULL,
+  "data_saida" TIMESTAMP,
   PRIMARY KEY ("id")
 );
 

@@ -37,7 +37,15 @@ USING (true);
 -- Permitir que apenas usuários autenticados criem comunidades
 CREATE POLICY "Comunidades_Insert_Authenticated" ON "Comunidades"
 FOR INSERT
-WITH CHECK (auth.uid() IS NOT NULL);
+WITH CHECK (
+  EXISTS (
+    SELECT 1
+    FROM "Usuarios"
+    WHERE id = id_usuario_criador
+      AND id_auth_users = auth.uid()
+      AND LOWER(tipo) = 'docente'
+  )
+);
 
 -- Permitir que o criador da comunidade atualize os dados
 CREATE POLICY "Comunidades_Update_Owner" ON "Comunidades"
