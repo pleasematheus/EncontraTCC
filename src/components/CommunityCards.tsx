@@ -1,6 +1,7 @@
 interface Community {
   id: string
   nome: string
+  discriminador: string
   descricao: string
   total_posts: number
   total_usuarios: number
@@ -54,7 +55,12 @@ const CommunityCards = ({ communities }: CommunityCardsProps) => {
                   </div>
                 </div>
                 <div className="card-actions mt-4">
-                  <button className="btn btn-outline btn-sm">Ver mais</button>
+                  <a
+                    href={`/comunidade/${community.discriminador}`}
+                    className="btn btn-outline btn-sm"
+                  >
+                    Ver mais
+                  </a>
                 </div>
               </div>
             </div>

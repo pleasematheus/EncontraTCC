@@ -48,6 +48,11 @@ BEFORE INSERT OR UPDATE ON public."Comunidades"
 FOR EACH ROW
 EXECUTE FUNCTION public.sp_insert_description_vector();
 
+CREATE TRIGGER trg_insert_description_vector_postagens
+BEFORE INSERT OR UPDATE ON public."Postagens"
+FOR EACH ROW
+EXECUTE FUNCTION public.sp_insert_description_vector();
+
 CREATE TRIGGER trg_after_auth_users_update
 AFTER UPDATE ON auth.users
 FOR EACH ROW

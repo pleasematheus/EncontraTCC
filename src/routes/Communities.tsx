@@ -15,7 +15,7 @@ interface Community {
   data_atualizacao: string
 }
 
-export default function Comunidades() {
+export default function Communities() {
   const {} = useTheme()
 
   const [loading, setLoading] = useState(true)
@@ -62,7 +62,7 @@ export default function Comunidades() {
       .select("*")
       .order("data_criacao", { ascending: false })
       .limit(10)
-    
+
     if (error) {
       console.error("Erro ao buscar comunidades:", error)
     } else {
@@ -70,7 +70,6 @@ export default function Comunidades() {
     }
     setLoading(false)
   }
-
 
   // Carrega as comunidades quando o componente é montado.
   useEffect(() => {

@@ -7,7 +7,9 @@ import Cadastro from "./Cadastro"
 import Dashboard from "./Dashboard"
 import ProtectedRoute from "../middleware/ProtectedRoute"
 import Profile from "./Profile"
-import Comunidades from "./Comunidades"
+import Communities from "./Communities"
+import Community from "./Community"
+import CreatePost from "./CreatePost"
 
 const router = createBrowserRouter([
   {
@@ -43,10 +45,26 @@ const router = createBrowserRouter([
     path: "/comunidades",
     element: (
       <ProtectedRoute>
-        <Comunidades />
+        <Communities />
       </ProtectedRoute>
     ),
-  }
+  },
+  {
+    path: "/comunidade/:discriminador",
+    element: (
+      <ProtectedRoute>
+        <Community />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/comunidade/:discriminador/criar-postagem",
+    element: (
+      <ProtectedRoute>
+        <CreatePost />
+      </ProtectedRoute>
+    ),
+  },
 ])
 
 export default function App() {
