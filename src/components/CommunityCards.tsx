@@ -27,6 +27,9 @@ const CommunityCards = ({ communities }: CommunityCardsProps) => {
                 <h3 className="card-title text-xl font-bold text-card-foreground">
                   {community.nome}
                 </h3>
+                <span className="badge badge-outline text-xs mb-2">
+                  #{community.discriminador}
+                </span>
                 <p className="text-base text-gray-700 dark:text-gray-300 mt-2">
                   {community.descricao}
                 </p>

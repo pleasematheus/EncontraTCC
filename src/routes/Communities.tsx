@@ -25,6 +25,7 @@ export default function Communities() {
   const [modalOpen, setModalOpen] = useState(false)
   const [nome, setNome] = useState("")
   const [descricao, setDescricao] = useState("")
+  const [discriminador, setDiscriminador] = useState("")
   const [submitting, setSubmitting] = useState(false)
 
   // Busca o tipo do usuário autenticado.
@@ -81,6 +82,13 @@ export default function Communities() {
   const handleCreateCommunity = async () => {
     setSubmitting(true)
 
+    // Validar tamanho do discriminador (mínimo 3 caracteres)
+    if (discriminador.length < 3) {
+      alert("O discriminador deve ter pelo menos 3 caracteres.")
+      setSubmitting(false)
+      return
+    }
+
     // Obter o usuário autenticado
     const {
       data: { user },
@@ -121,6 +129,7 @@ export default function Communities() {
       {
         nome,
         descricao,
+        discriminador,
         id_usuario_criador: usuarioData.id, // Esse valor está de acordo com a FK da tabela "Usuarios"
         total_posts: 0,
         total_usuarios: 1,
@@ -134,6 +143,7 @@ export default function Communities() {
       // Limpa os campos e fecha o modal.
       setNome("")
       setDescricao("")
+      setDiscriminador("")
       setModalOpen(false)
       // Atualiza a lista de comunidades para incluir a nova.
       await getComunidades()
@@ -203,6 +213,26 @@ export default function Communities() {
               />
             </div>
 
+            <div className="form-control mb-4">
+              <label className="label">
+                <span className="label-text">Discriminador</span>
+              </label>
+              <input
+                type="text"
+                className="input input-bordered"
+                placeholder="Ex: dev, mat, comp"
+                maxLength={9}
+                value={discriminador}
+                onChange={(e) => setDiscriminador(e.target.value)}
+              />
+              <label className="label">
+                <span className="label-text-alt">
+                  O discriminador deve ter entre 3 e 9 caracteres e ajudará a identificar
+                  sua comunidade
+                </span>
+              </label>
+            </div>
+
             <div className="modal-action">
               <button
                 className="btn"
@@ -210,6 +240,7 @@ export default function Communities() {
                   setModalOpen(false)
                   setNome("")
                   setDescricao("")
+                  setDiscriminador("")
                 }}
               >
                 Cancelar
@@ -217,7 +248,12 @@ export default function Communities() {
               <button
                 className={`btn btn-primary ${submitting ? "loading" : ""}`}
                 onClick={handleCreateCommunity}
-                disabled={submitting || !nome.trim() || !descricao.trim()}
+                disabled={
+                  submitting ||
+                  !nome.trim() ||
+                  !descricao.trim() ||
+                  !discriminador.trim()
+                }
               >
                 Criar
               </button>

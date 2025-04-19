@@ -14,7 +14,7 @@ interface PostCardProps {
 
 const PostCards = ({ post }: PostCardProps) => {
   return (
-    <div className="bg-white shadow rounded p-6 hover:shadow-lg transition duration-300">
+    <div className="bg-base-200 shadow rounded p-6 hover:shadow-lg transition duration-300">
       <h2 className="text-2xl font-semibold mb-2">{post.titulo}</h2>
       <p className="text-gray-700 mb-4">{post.descricao}</p>
       <div className="flex justify-between items-center">
