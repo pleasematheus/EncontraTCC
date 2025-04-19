@@ -88,7 +88,7 @@ export default function CreatePost() {
       }
 
       // Criar nova postagem
-      const { data, error } = await supabase
+      const { error } = await supabase
         .from("Postagens")
         .insert([
           {
@@ -103,7 +103,6 @@ export default function CreatePost() {
           },
         ])
         .select()
-
 
       if (error) {
         console.error("Erro ao criar postagem:", error)

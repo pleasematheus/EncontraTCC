@@ -13,6 +13,7 @@ interface Community {
   total_usuarios: number
   data_criacao: string
   data_atualizacao: string
+  discriminador: string // Added this property to match the expected type
 }
 
 export default function Communities() {
