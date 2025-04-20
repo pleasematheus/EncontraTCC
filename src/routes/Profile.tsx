@@ -21,13 +21,13 @@ const Profile = () => {
     const getUser = async () => {
       try {
         const {
-          data: { session },
-          error: sessionError,
-        } = await supabase.auth.getSession()
+          data: { user },
+          error: userError,
+        } = await supabase.auth.getUser()
 
-        if (sessionError) throw sessionError
+        if (userError) throw userError
 
-        const userId = session?.user?.id
+        const userId = user?.id
 
         if (!userId) throw new Error("Usuário não autenticado")
 

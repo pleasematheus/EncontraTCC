@@ -20,33 +20,34 @@ export default function Header() {
 
   useEffect(() => {
     const getUser = async () => {
-      // Obter sessão do usuário autenticado
+      // Obter dados do usuário autenticado
       const {
-        data: { session },
-      } = await supabase.auth.getSession()
+        data: { user: authUser },
+        error: authError,
+      } = await supabase.auth.getUser()
 
-      if (session?.user) {
+      if (authUser) {
         // Usar o ID do usuário autenticado para buscar informações na tabela Usuarios
         const { data: usuarioData, error } = await supabase
           .from("Usuarios")
           .select("nome, email")
-          .eq("id_auth_users", session.user.id)
+          .eq("id_auth_users", authUser.id)
           .single()
 
         if (error) {
           console.error("Erro ao buscar dados do usuário:", error)
           // Fallback para os dados de auth caso não encontre na tabela Usuarios
           setUser({
-            email: session.user.email,
-            name: session.user.user_metadata?.name || "Usuário",
-            userId: session.user.id,
+            email: authUser.email,
+            name: authUser.user_metadata?.name || "Usuário",
+            userId: authUser.id,
           })
         } else {
           // Usar os dados da tabela Usuarios
           setUser({
             email: usuarioData.email,
             name: usuarioData.nome,
-            userId: session.user.id,
+            userId: authUser.id,
           })
         }
       }
