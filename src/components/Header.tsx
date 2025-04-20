@@ -23,7 +23,6 @@ export default function Header() {
       // Obter dados do usuário autenticado
       const {
         data: { user: authUser },
-        error: authError,
       } = await supabase.auth.getUser()
 
       if (authUser) {
