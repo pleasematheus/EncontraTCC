@@ -41,6 +41,35 @@ BEGIN
 END; 
 $$;
 
+-- Função para incrementar o contador de usuários em uma comunidade
+CREATE OR REPLACE FUNCTION public.increment_community_users(community_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE public."Comunidades"
+  SET total_usuarios = total_usuarios + 1
+  WHERE id = community_id;
+END;
+$$;
+
+-- Função para decrementar o contador de usuários em uma comunidade
+CREATE OR REPLACE FUNCTION public.decrement_community_users(community_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+AS $$
+BEGIN
+  UPDATE public."Comunidades"
+  SET total_usuarios = GREATEST(total_usuarios - 1, 0) -- Evita números negativos
+  WHERE id = community_id;
+END;
+$$;
+
+-- Conceder permissões para funções
+GRANT EXECUTE ON FUNCTION public.increment_community_users(uuid) TO authenticated;
+GRANT EXECUTE ON FUNCTION public.decrement_community_users(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.sp_insert_usuario(uuid, text, text, text) TO anon;
 
 CREATE TRIGGER trg_insert_description_vector

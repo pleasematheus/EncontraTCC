@@ -50,7 +50,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/comunidade/:discriminador",
+    path: "/c/:discriminador",
     element: (
       <ProtectedRoute>
         <Community />
@@ -58,7 +58,7 @@ const router = createBrowserRouter([
     ),
   },
   {
-    path: "/comunidade/:discriminador/criar-postagem",
+    path: "/c/:discriminador/criar-postagem",
     element: (
       <ProtectedRoute>
         <CreatePost />

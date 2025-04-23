@@ -4,6 +4,7 @@ import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import CommunityCards from "@/components/CommunityCards"
 import supabase from "@/utils/supabase"
+import { PlusCircle } from "lucide-react"
 
 interface Community {
   id: string
@@ -13,7 +14,8 @@ interface Community {
   total_usuarios: number
   data_criacao: string
   data_atualizacao: string
-  discriminador: string // Added this property to match the expected type
+  discriminador: string
+  is_following?: boolean // Adicionado para controle de seguidores
 }
 
 export default function Communities() {
@@ -27,10 +29,11 @@ export default function Communities() {
   const [descricao, setDescricao] = useState("")
   const [discriminador, setDiscriminador] = useState("")
   const [submitting, setSubmitting] = useState(false)
+  const [userId, setUserId] = useState<string | null>(null) // ID do usuário atual
 
-  // Busca o tipo do usuário autenticado.
+  // Busca o tipo do usuário autenticado e seu ID
   useEffect(() => {
-    const fetchUserType = async () => {
+    const fetchUserInfo = async () => {
       const {
         data: { user },
         error: userError,
@@ -43,40 +46,84 @@ export default function Communities() {
 
       const { data, error } = await supabase
         .from("Usuarios")
-        .select("tipo")
+        .select("id, tipo")
         .eq("id_auth_users", user.id)
         .single()
 
       if (error) {
-        console.error("Erro ao buscar tipo de usuário:", error)
+        console.error("Erro ao buscar informações do usuário:", error)
       } else {
         setUserType(data?.tipo.toLowerCase())
+        setUserId(data?.id || null)
       }
     }
 
-    fetchUserType()
+    fetchUserInfo()
   }, [])
 
-  // Função para buscar e atualizar a lista de comunidades.
+  // Função para buscar e atualizar a lista de comunidades junto com status de seguidor
   const getComunidades = async () => {
-    const { data, error } = await supabase
+    if (!userId) {
+      const { data, error } = await supabase
+        .from("Comunidades")
+        .select("*")
+        .order("data_criacao", { ascending: false })
+        .limit(10)
+
+      if (error) {
+        console.error("Erro ao buscar comunidades:", error)
+      } else {
+        setCommunities(data as Community[])
+      }
+      setLoading(false)
+      return
+    }
+
+    // Busca comunidades
+    const { data: communitiesData, error: communitiesError } = await supabase
       .from("Comunidades")
       .select("*")
       .order("data_criacao", { ascending: false })
       .limit(10)
 
-    if (error) {
-      console.error("Erro ao buscar comunidades:", error)
-    } else {
-      setCommunities(data as Community[])
+    if (communitiesError) {
+      console.error("Erro ao buscar comunidades:", communitiesError)
+      setLoading(false)
+      return
     }
+
+    // Busca relações de seguidor para o usuário atual
+    const { data: followingData, error: followingError } = await supabase
+      .from("usuario_comunidade")
+      .select("id_comunidade")
+      .eq("id_usuario", userId)
+      .eq("tipo", "seguidor") // Corrigido para usar "tipo" conforme a estrutura da tabela
+
+    if (followingError) {
+      console.error("Erro ao buscar comunidades seguidas:", followingError)
+    }
+
+    // Cria um Set com IDs das comunidades seguidas para busca eficiente
+    const followingSet = new Set(
+      (followingData || []).map((item) => item.id_comunidade)
+    )
+
+    // Marca as comunidades seguidas pelo usuário
+    const communitiesWithFollowStatus = (communitiesData || []).map(
+      (community) => ({
+        ...community,
+        is_following: followingSet.has(community.id),
+      })
+    )
+
+    setCommunities(communitiesWithFollowStatus)
     setLoading(false)
   }
 
-  // Carrega as comunidades quando o componente é montado.
+  // Carrega as comunidades quando o componente é montado ou userId muda
   useEffect(() => {
     getComunidades()
-  }, [])
+  }, [userId])
 
   // Função para criar comunidade, validando o tipo e inserindo os dados corretos.
   const handleCreateCommunity = async () => {
@@ -166,7 +213,10 @@ export default function Communities() {
             Ainda não há comunidades cadastradas.
           </p>
         ) : (
-          <CommunityCards communities={communities} />
+          <CommunityCards
+            communities={communities}
+            userId={userId || undefined}
+          />
         )}
       </main>
 
@@ -177,6 +227,7 @@ export default function Communities() {
             className="btn btn-primary shadow-lg"
             onClick={() => setModalOpen(true)}
           >
+            <PlusCircle size={18} />
             Criar comunidade
           </button>
         </div>
@@ -227,8 +278,8 @@ export default function Communities() {
               />
               <label className="label">
                 <span className="label-text-alt">
-                  O discriminador deve ter entre 3 e 9 caracteres e ajudará a identificar
-                  sua comunidade
+                  O discriminador deve ter entre 3 e 9 caracteres e ajudará a
+                  identificar sua comunidade
                 </span>
               </label>
             </div>

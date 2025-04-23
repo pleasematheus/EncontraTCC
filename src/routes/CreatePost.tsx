@@ -44,16 +44,16 @@ export default function CreatePost() {
           .single()
 
         if (error || data?.tipo !== "Docente") {
-          navigate(`/comunidade/${discriminador}`)
+          navigate(`/c/${discriminador}`)
         }
       } catch (error) {
         console.error("Erro ao verificar tipo de usuário:", error)
-        navigate(`/comunidade/${discriminador}`)
+        navigate(`/c/${discriminador}`)
       }
     }
 
     if (!communityId) {
-      navigate(`/comunidade/${discriminador}`)
+      navigate(`/c/${discriminador}`)
     } else {
       checkUserType()
     }
@@ -110,7 +110,7 @@ export default function CreatePost() {
       } else {
         setSuccessMessage("Postagem criada com sucesso!")
         setTimeout(() => {
-          navigate(`/comunidade/${discriminador}`)
+          navigate(`/c/${discriminador}`)
         }, 2000)
       }
     } catch (error: any) {
@@ -205,7 +205,7 @@ export default function CreatePost() {
             <div className="flex justify-between">
               <button
                 type="button"
-                onClick={() => navigate(`/comunidade/${discriminador}`)}
+                onClick={() => navigate(`/c/${discriminador}`)}
                 className="btn btn-outline"
               >
                 Cancelar

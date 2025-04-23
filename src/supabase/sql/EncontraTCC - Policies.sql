@@ -102,6 +102,35 @@ CREATE POLICY "usuario_comunidade_Delete_Self" ON "usuario_comunidade" FOR DELET
   )
 );
 
+CREATE POLICY "usuario_comunidade_Follow_Community" ON "usuario_comunidade" FOR INSERT
+WITH
+  CHECK (
+    auth.uid () IS NOT NULL AND
+    tipo = 'membro' AND
+    auth.uid () = (
+      SELECT
+        id_auth_users
+      FROM
+        "Usuarios"
+      WHERE
+        id = id_usuario
+    )
+  );
+
+-- Permitir que usuários deixem de seguir comunidades (remover registros com role='seguidor')
+CREATE POLICY "usuario_comunidade_Unfollow_Community" ON "usuario_comunidade" FOR DELETE
+USING (
+  auth.uid () = (
+    SELECT
+      id_auth_users
+    FROM
+      "Usuarios"
+    WHERE
+      id = id_usuario
+  ) AND
+  tipo = 'membro'
+);
+
 /***Postagens***/
 -- Permitir leitura pública dos dados
 CREATE POLICY "Postagens_Read_Public" ON "Postagens" FOR

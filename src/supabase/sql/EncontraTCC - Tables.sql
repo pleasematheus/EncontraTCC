@@ -32,8 +32,9 @@ CREATE TABLE
   IF NOT EXISTS "usuario_comunidade" (
     "id" UUID NOT NULL DEFAULT uuid_generate_v4 () UNIQUE,
     "id_comunidade" UUID NOT NULL,
-    "role" VARCHAR(20) NOT NULL,
+    "tipo" VARCHAR(20) NOT NULL,
     "id_usuario" UUID NOT NULL,
+    "data_entrada" TIMESTAMP NOT NULL DEFAULT NOW (),
     PRIMARY KEY ("id")
   );
 

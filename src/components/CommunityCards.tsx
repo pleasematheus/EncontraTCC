@@ -1,3 +1,6 @@
+import { useState, useEffect } from "react"
+import supabase from "@/utils/supabase"
+
 interface Community {
   id: string
   nome: string
@@ -11,9 +14,91 @@ interface Community {
 
 interface CommunityCardsProps {
   communities: Community[]
+  userId?: string // ID do usuário autenticado
 }
 
-const CommunityCards = ({ communities }: CommunityCardsProps) => {
+const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
+  // estado mapeando id da comunidade -> se está seguindo
+  const [followingStatus, setFollowingStatus] = useState<
+    Record<string, boolean>
+  >({})
+
+  // ao montar (ou quando mudar userId/communities), buscar follows do usuário
+  useEffect(() => {
+    if (!userId) return
+
+    const fetchFollows = async () => {
+      const { data, error } = await supabase
+        .from("usuario_comunidade")
+        .select("id_comunidade")
+        .eq("id_usuario", userId)
+
+      if (error) {
+        console.error("Erro ao buscar comunidades seguidas:", error)
+        return
+      }
+
+      // inicializa o map de follows
+      const status: Record<string, boolean> = {}
+      data.forEach((row) => {
+        status[row.id_comunidade] = true
+      })
+      // garante que todas as comunidades tenham um valor booleano
+      communities.forEach((c) => {
+        if (status[c.id] === undefined) status[c.id] = false
+      })
+
+      setFollowingStatus(status)
+    }
+
+    fetchFollows()
+  }, [userId, communities])
+
+  // alterna o estado de follow e sincroniza com o Supabase
+  const handleFollowToggle = async (communityId: string) => {
+    if (!userId) return
+
+    const isCurrentlyFollowing = followingStatus[communityId]
+
+    // otimista: já inverte no UI
+    setFollowingStatus((prev) => ({
+      ...prev,
+      [communityId]: !isCurrentlyFollowing,
+    }))
+
+    try {
+      if (!isCurrentlyFollowing) {
+        // insere um novo follow
+        const { error } = await supabase.from("usuario_comunidade").insert({
+          id_comunidade: communityId,
+          id_usuario: userId,
+          tipo: "membro", // ou outro valor conforme seu domínio
+        })
+        if (error) throw error
+      } else {
+        // remove o follow existente
+        const { error } = await supabase
+          .from("usuario_comunidade")
+          .delete()
+          .eq("id_usuario", userId)
+          .eq("id_comunidade", communityId)
+        if (error) throw error
+      }
+    } catch (error) {
+      console.error("Erro ao atualizar follow:", error)
+      // reverte em caso de falha
+      setFollowingStatus((prev) => ({
+        ...prev,
+        [communityId]: isCurrentlyFollowing,
+      }))
+    }
+  }
+
+  // utilitário para ler o estado atual de follow
+  const isFollowing = (communityId: string) => {
+    return followingStatus[communityId] || false
+  }
+
   return (
     <section className="py-8">
       <div className="container mx-auto px-4">
@@ -57,14 +142,26 @@ const CommunityCards = ({ communities }: CommunityCardsProps) => {
                     </p>
                   </div>
                 </div>
-                <div className="card-actions mt-4">
-                  <a
-                    href={`/comunidade/${community.discriminador}`}
-                    className="btn btn-outline btn-sm"
-                  >
-                    Ver mais
-                  </a>
-                </div>
+                {userId && (
+                  <div className="card-actions mt-4 flex justify-between items-center">
+                    <a
+                      href={`/c/${community.discriminador}`}
+                      className="btn btn-outline btn-sm"
+                    >
+                      Ver mais
+                    </a>
+                    <button
+                      onClick={() => handleFollowToggle(community.id)}
+                      className={`btn btn-sm ${
+                        isFollowing(community.id)
+                          ? "btn-primary"
+                          : "btn-outline btn-primary"
+                      }`}
+                    >
+                      {isFollowing(community.id) ? "Seguindo" : "Seguir"}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           ))}
