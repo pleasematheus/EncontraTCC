@@ -268,7 +268,7 @@ export default function CommunityPage() {
             Criar Postagem
           </button>
         </div>
-      )}
+      )} 
 
       <Footer />
     </>

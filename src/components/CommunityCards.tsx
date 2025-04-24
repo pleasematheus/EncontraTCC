@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react"
 import supabase from "@/utils/supabase"
+import { UserPlus, UserMinus } from "lucide-react"
 
 interface Community {
   id: string
@@ -22,6 +23,17 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
   const [followingStatus, setFollowingStatus] = useState<
     Record<string, boolean>
   >({})
+  // estado para controlar loading por comunidade
+  const [followLoading, setFollowLoading] = useState<Record<string, boolean>>(
+    {}
+  )
+  // manter uma cópia local das comunidades para atualizar contadores
+  const [localCommunities, setLocalCommunities] = useState<Community[]>([])
+
+  // inicializar comunidades locais
+  useEffect(() => {
+    setLocalCommunities(communities)
+  }, [communities])
 
   // ao montar (ou quando mudar userId/communities), buscar follows do usuário
   useEffect(() => {
@@ -32,6 +44,7 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
         .from("usuario_comunidade")
         .select("id_comunidade")
         .eq("id_usuario", userId)
+        .eq("tipo", "seguidor") // Alterado para usar "seguidor" em vez de "membro"
 
       if (error) {
         console.error("Erro ao buscar comunidades seguidas:", error)
@@ -58,38 +71,86 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
   const handleFollowToggle = async (communityId: string) => {
     if (!userId) return
 
-    const isCurrentlyFollowing = followingStatus[communityId]
-
-    // otimista: já inverte no UI
-    setFollowingStatus((prev) => ({
+    // Ativa loading para esta comunidade específica
+    setFollowLoading((prev) => ({
       ...prev,
-      [communityId]: !isCurrentlyFollowing,
+      [communityId]: true,
     }))
+
+    const isCurrentlyFollowing = followingStatus[communityId]
 
     try {
       if (!isCurrentlyFollowing) {
-        // insere um novo follow
-        const { error } = await supabase.from("usuario_comunidade").insert({
-          id_comunidade: communityId,
-          id_usuario: userId,
-          tipo: "membro", // ou outro valor conforme seu domínio
-        })
+        // Adicionar o usuário como seguidor
+        const { error } = await supabase.from("usuario_comunidade").insert([
+          {
+            id_comunidade: communityId,
+            id_usuario: userId,
+            tipo: "seguidor", // Alterado para "seguidor" em vez de "membro"
+          },
+        ])
         if (error) throw error
+
+        // Incrementar contador de usuários
+        await supabase.rpc("increment_community_users", {
+          community_id: communityId,
+        })
+
+        // Atualizar a UI
+        setFollowingStatus((prev) => ({
+          ...prev,
+          [communityId]: true,
+        }))
+
+        // Atualizar contagem local de usuários
+        setLocalCommunities((prev) =>
+          prev.map((community) =>
+            community.id === communityId
+              ? { ...community, total_usuarios: community.total_usuarios + 1 }
+              : community
+          )
+        )
       } else {
-        // remove o follow existente
+        // Remover o usuário como seguidor
         const { error } = await supabase
           .from("usuario_comunidade")
           .delete()
-          .eq("id_usuario", userId)
           .eq("id_comunidade", communityId)
+          .eq("id_usuario", userId)
+          .eq("tipo", "seguidor")
+
         if (error) throw error
+
+        // Decrementar contador de usuários
+        await supabase.rpc("decrement_community_users", {
+          community_id: communityId,
+        })
+
+        // Atualizar a UI
+        setFollowingStatus((prev) => ({
+          ...prev,
+          [communityId]: false,
+        }))
+
+        // Atualizar contagem local de usuários
+        setLocalCommunities((prev) =>
+          prev.map((community) =>
+            community.id === communityId
+              ? {
+                  ...community,
+                  total_usuarios: Math.max(community.total_usuarios - 1, 0),
+                }
+              : community
+          )
+        )
       }
     } catch (error) {
       console.error("Erro ao atualizar follow:", error)
-      // reverte em caso de falha
-      setFollowingStatus((prev) => ({
+    } finally {
+      // Desativa loading para esta comunidade
+      setFollowLoading((prev) => ({
         ...prev,
-        [communityId]: isCurrentlyFollowing,
+        [communityId]: false,
       }))
     }
   }
@@ -99,11 +160,16 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
     return followingStatus[communityId] || false
   }
 
+  // utilitário para verificar se uma comunidade está em loading
+  const isLoading = (communityId: string) => {
+    return followLoading[communityId] || false
+  }
+
   return (
     <section className="py-8">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {communities.map((community) => (
+          {localCommunities.map((community) => (
             <div
               key={community.id}
               className="card bg-card shadow-xl border border-base-300 transition-transform duration-300 hover:scale-105"
@@ -152,13 +218,24 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
                     </a>
                     <button
                       onClick={() => handleFollowToggle(community.id)}
+                      disabled={isLoading(community.id)}
                       className={`btn btn-sm ${
                         isFollowing(community.id)
                           ? "btn-primary"
                           : "btn-outline btn-primary"
-                      }`}
+                      } flex items-center gap-2`}
                     >
-                      {isFollowing(community.id) ? "Seguindo" : "Seguir"}
+                      {isLoading(community.id) ? (
+                        <span className="loading loading-spinner loading-xs"></span>
+                      ) : isFollowing(community.id) ? (
+                        <>
+                          <UserMinus size={16} /> Seguindo
+                        </>
+                      ) : (
+                        <>
+                          <UserPlus size={16} /> Seguir
+                        </>
+                      )}
                     </button>
                   </div>
                 )}
