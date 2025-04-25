@@ -140,9 +140,11 @@ export default function CommunityPage() {
   // Função para verificar se o usuário pode editar um post
   const canEditPost = (post: Post) => {
     // Apenas docentes que criaram o post podem editá-lo
-    return userInfo.tipo === "Docente" && 
-           userInfo.id === post.id_usuario_criador && 
-           isFollowing
+    return (
+      userInfo.tipo === "Docente" &&
+      userInfo.id === post.id_usuario_criador &&
+      isFollowing
+    )
   }
 
   // Função para seguir/deixar de seguir a comunidade
@@ -263,9 +265,9 @@ export default function CommunityPage() {
           <div className="grid grid-cols-1 gap-4">
             {posts.length > 0 ? (
               posts.map((post) => (
-                <PostCards 
-                  key={post.id} 
-                  post={post} 
+                <PostCards
+                  key={post.id}
+                  post={post}
                   isEditable={canEditPost(post)}
                   communityDiscriminator={discriminador}
                   onPostUpdate={handlePostUpdate}
@@ -293,7 +295,7 @@ export default function CommunityPage() {
             Criar Postagem
           </button>
         </div>
-      )} 
+      )}
 
       <Footer />
     </>

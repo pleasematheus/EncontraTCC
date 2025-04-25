@@ -101,7 +101,7 @@ export default function CreatePost() {
             status: "Ativo",
             data_criacao: new Date(),
             id_usuario_criador: userData.id,
-            candidaturas_abertas: candidaturasAbertas
+            candidaturas_abertas: candidaturasAbertas,
           },
         ])
         .select()

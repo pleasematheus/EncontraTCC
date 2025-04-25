@@ -21,17 +21,17 @@ interface PostCardProps {
   isEditable?: boolean
   communityDiscriminator?: string
   onPostUpdate?: () => void
-  userType?: string | null  // Tipo do usuário (Discente/Docente)
-  isFollowing?: boolean     // Indica se o usuário segue a comunidade
+  userType?: string | null // Tipo do usuário (Discente/Docente)
+  isFollowing?: boolean // Indica se o usuário segue a comunidade
 }
 
-const PostCards = ({ 
-  post, 
-  isEditable = false, 
-  communityDiscriminator, 
-  onPostUpdate, 
-  userType, 
-  isFollowing 
+const PostCards = ({
+  post,
+  isEditable = false,
+  communityDiscriminator,
+  onPostUpdate,
+  userType,
+  isFollowing,
 }: PostCardProps) => {
   const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
@@ -40,7 +40,9 @@ const PostCards = ({
   const [descricao, setDescricao] = useState(post.descricao)
   const [tipo, setTipo] = useState(post.tipo)
   const [prazo, setPrazo] = useState(post.prazo || "")
-  const [permiteCandidatura, setPermiteCandidatura] = useState(post.candidaturas_abertas || false)
+  const [permiteCandidatura, setPermiteCandidatura] = useState(
+    post.candidaturas_abertas || false
+  )
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [isCandidaturaLoading, setIsCandidaturaLoading] = useState(false)
@@ -67,8 +69,10 @@ const PostCards = ({
 
     try {
       // Verificar se usuário está autenticado
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (!user) {
         setErrorMessage("Usuário não autenticado")
         setIsLoading(false)
@@ -92,7 +96,7 @@ const PostCards = ({
 
       // Atualizar UI e sair do modo de edição
       setIsEditing(false)
-      
+
       // Notificar componente pai sobre a atualização
       if (onPostUpdate) {
         onPostUpdate()
@@ -122,8 +126,10 @@ const PostCards = ({
 
     try {
       // Verificar se usuário está autenticado
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (!user) {
         setErrorMessage("Usuário não autenticado")
         setIsLoading(false)
@@ -158,8 +164,10 @@ const PostCards = ({
 
     try {
       // Verificar se usuário está autenticado
-      const { data: { user } } = await supabase.auth.getUser()
-      
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
       if (!user) {
         setErrorMessage("Usuário não autenticado")
         setIsCandidaturaLoading(false)
@@ -180,12 +188,13 @@ const PostCards = ({
       }
 
       // Verificar se já existe candidatura deste usuário para esta postagem
-      const { data: candidaturaExistente, error: candidaturaError } = await supabase
-        .from("Candidaturas")
-        .select("id")
-        .eq("id_postagem", post.id)
-        .eq("id_usuario", userData.id)
-        .maybeSingle()
+      const { data: candidaturaExistente, error: candidaturaError } =
+        await supabase
+          .from("Candidaturas")
+          .select("id")
+          .eq("id_postagem", post.id)
+          .eq("id_usuario", userData.id)
+          .maybeSingle()
 
       if (candidaturaError) {
         throw candidaturaError
@@ -198,22 +207,19 @@ const PostCards = ({
       }
 
       // Criar candidatura
-      const { error } = await supabase
-        .from("Candidaturas")
-        .insert([
-          {
-            id_postagem: post.id,
-            id_usuario: userData.id,
-            data_candidatura: new Date().toISOString(),
-            status: "Pendente"
-          },
-        ])
+      const { error } = await supabase.from("Candidaturas").insert([
+        {
+          id_postagem: post.id,
+          id_usuario: userData.id,
+          data_candidatura: new Date().toISOString(),
+          status: "Pendente",
+        },
+      ])
 
       if (error) throw error
 
       // Notificar usuário do sucesso
       alert("Candidatura realizada com sucesso!")
-      
     } catch (error: any) {
       console.error("Erro ao candidatar-se:", error)
       setErrorMessage(`Erro ao candidatar-se: ${error.message}`)
@@ -224,16 +230,16 @@ const PostCards = ({
 
   // Formatar data para exibição
   const formatDate = (dateString?: string) => {
-    if (!dateString) return null;
-    
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return null;
-    
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    if (!dateString) return null
+
+    const date = new Date(dateString)
+    if (isNaN(date.getTime())) return null
+
+    return date.toLocaleDateString("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    })
   }
 
   // Renderizar modal de confirmação de exclusão
@@ -242,13 +248,13 @@ const PostCards = ({
       <div className="bg-base-200 shadow rounded p-6 hover:shadow-lg transition duration-300">
         <h3 className="text-xl font-semibold mb-4">Confirmar exclusão</h3>
         <p className="mb-6">Tem certeza que deseja excluir "{post.titulo}"?</p>
-        
+
         {errorMessage && (
           <div className="alert alert-error mb-4 text-sm">
             <span>{errorMessage}</span>
           </div>
         )}
-        
+
         <div className="flex justify-end space-x-2">
           <button
             type="button"
@@ -288,7 +294,7 @@ const PostCards = ({
               <span>{errorMessage}</span>
             </div>
           )}
-          
+
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Título</span>
@@ -303,7 +309,7 @@ const PostCards = ({
               minLength={3}
             />
           </div>
-          
+
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Descrição</span>
@@ -316,7 +322,7 @@ const PostCards = ({
               required
             ></textarea>
           </div>
-          
+
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Tipo</span>
@@ -334,7 +340,7 @@ const PostCards = ({
               <option value="Outro">Outro</option>
             </select>
           </div>
-          
+
           <div className="form-control mb-4">
             <label className="label">
               <span className="label-text">Prazo (opcional)</span>
@@ -358,7 +364,7 @@ const PostCards = ({
               />
             </label>
           </div>
-          
+
           <div className="flex justify-end space-x-2 mt-4">
             <button
               type="button"
@@ -415,11 +421,12 @@ const PostCards = ({
       <div className="flex justify-between items-center">
         <small className="text-gray-500">
           {formatDate(post.data_criacao)}
-          {post.data_atualizacao && post.data_atualizacao !== post.data_criacao && (
-            <span className="ml-2">
-              (Atualizado em {formatDate(post.data_atualizacao)})
-            </span>
-          )}
+          {post.data_atualizacao &&
+            post.data_atualizacao !== post.data_criacao && (
+              <span className="ml-2">
+                (Atualizado em {formatDate(post.data_atualizacao)})
+              </span>
+            )}
         </small>
         {post.tipo && (
           <span className="bg-primary/10 text-primary px-2 py-1 rounded text-xs">
