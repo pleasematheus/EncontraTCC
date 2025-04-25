@@ -22,6 +22,7 @@ export default function CreatePost() {
   const [descricao, setDescricao] = useState("")
   const [tipo, setTipo] = useState("Projeto")
   const [prazo, setPrazo] = useState("")
+  const [candidaturasAbertas, setCandidaturasAbertas] = useState(false)
 
   // Verificar se o usuário é docente
   useEffect(() => {
@@ -100,6 +101,7 @@ export default function CreatePost() {
             status: "Ativo",
             data_criacao: new Date(),
             id_usuario_criador: userData.id,
+            candidaturas_abertas: candidaturasAbertas
           },
         ])
         .select()
@@ -200,6 +202,18 @@ export default function CreatePost() {
                 value={prazo}
                 onChange={(e) => setPrazo(e.target.value)}
               />
+            </div>
+
+            <div className="form-control mb-6">
+              <label className="label cursor-pointer">
+                <span className="label-text">Candidaturas Abertas</span>
+                <input
+                  type="checkbox"
+                  className="checkbox"
+                  checked={candidaturasAbertas}
+                  onChange={(e) => setCandidaturasAbertas(e.target.checked)}
+                />
+              </label>
             </div>
 
             <div className="flex justify-between">

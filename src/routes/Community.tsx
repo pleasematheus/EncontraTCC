@@ -15,6 +15,7 @@ interface Post {
   tipo: string
   prazo?: string
   data_criacao: string
+  id_usuario_criador?: string // ID do usuário que criou a postagem
 }
 
 interface Community {
@@ -108,27 +109,41 @@ export default function CommunityPage() {
     checkFollowStatus()
   }, [userInfo.id, community?.id])
 
+  // Função para buscar os posts da comunidade
+  const fetchPosts = async () => {
+    if (!community) return
+
+    const { data, error } = await supabase
+      .from("Postagens")
+      .select(
+        "id, comunidade_id, titulo, descricao, data_criacao, data_atualizacao, tipo, prazo, id_usuario_criador, candidaturas_abertas"
+      )
+      .eq("comunidade_id", community.id)
+
+    if (error) {
+      console.error("Error fetching posts:", error)
+    } else {
+      setPosts(data || [])
+    }
+  }
+
   // Consulta para buscar os posts da comunidade pelo ID da comunidade
   useEffect(() => {
-    async function fetchPosts() {
-      if (!community) return
-
-      const { data, error } = await supabase
-        .from("Postagens")
-        .select(
-          "id, comunidade_id, titulo, descricao, data_criacao, tipo, prazo"
-        )
-        .eq("comunidade_id", community.id)
-
-      if (error) {
-        console.error("Error fetching posts:", error)
-      } else {
-        setPosts(data || [])
-      }
-    }
-
     fetchPosts()
   }, [community])
+
+  // Função para atualizar a lista de posts após uma edição
+  const handlePostUpdate = () => {
+    fetchPosts()
+  }
+
+  // Função para verificar se o usuário pode editar um post
+  const canEditPost = (post: Post) => {
+    // Apenas docentes que criaram o post podem editá-lo
+    return userInfo.tipo === "Docente" && 
+           userInfo.id === post.id_usuario_criador && 
+           isFollowing
+  }
 
   // Função para seguir/deixar de seguir a comunidade
   const handleFollowToggle = async () => {
@@ -247,7 +262,17 @@ export default function CommunityPage() {
 
           <div className="grid grid-cols-1 gap-4">
             {posts.length > 0 ? (
-              posts.map((post) => <PostCards key={post.id} post={post} />)
+              posts.map((post) => (
+                <PostCards 
+                  key={post.id} 
+                  post={post} 
+                  isEditable={canEditPost(post)}
+                  communityDiscriminator={discriminador}
+                  onPostUpdate={handlePostUpdate}
+                  userType={userInfo.tipo}
+                  isFollowing={isFollowing}
+                />
+              ))
             ) : (
               <p className="text-center text-gray-600">
                 Ainda não há posts nessa comunidade

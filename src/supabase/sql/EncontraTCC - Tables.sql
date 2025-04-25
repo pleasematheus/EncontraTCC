@@ -52,6 +52,7 @@ CREATE TABLE
     "descricao_vector" TSVECTOR,
     "tipo" VARCHAR(255) NOT NULL,
     "prazo" TIMESTAMP,
+    "candidaturas_abertas" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR(20) NOT NULL,
     "data_criacao" TIMESTAMP NOT NULL DEFAULT NOW (),
     "data_atualizacao" TIMESTAMP,
