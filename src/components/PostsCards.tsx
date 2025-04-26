@@ -1,6 +1,5 @@
 import { useState } from "react"
 import { Edit2, Trash2 } from "lucide-react"
-import { useNavigate } from "react-router-dom"
 import supabase from "@/utils/supabase"
 
 interface Post {
@@ -28,12 +27,10 @@ interface PostCardProps {
 const PostCards = ({
   post,
   isEditable = false,
-  communityDiscriminator,
   onPostUpdate,
   userType,
   isFollowing,
 }: PostCardProps) => {
-  const navigate = useNavigate()
   const [isEditing, setIsEditing] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [titulo, setTitulo] = useState(post.titulo)
