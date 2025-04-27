@@ -10,6 +10,8 @@ import Profile from "./Profile"
 import Communities from "./Communities"
 import Community from "./Community"
 import CreatePost from "./CreatePost"
+import Candidaturas from "./Candidaturas"
+import CandidaturasDetalhes from "./CandidaturasDetalhes"
 
 const router = createBrowserRouter([
   {
@@ -62,6 +64,22 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <CreatePost />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/candidaturas",
+    element: (
+      <ProtectedRoute>
+        <Candidaturas />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/candidaturas/:id",
+    element: (
+      <ProtectedRoute>
+        <CandidaturasDetalhes />
       </ProtectedRoute>
     ),
   },

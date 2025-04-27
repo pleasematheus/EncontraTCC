@@ -15,6 +15,12 @@ interface Post {
   candidaturas_abertas?: boolean
 }
 
+interface CandidaturaData {
+  universidade: string
+  semestre: string
+  motivo: string
+}
+
 interface PostCardProps {
   post: Post
   isEditable?: boolean
@@ -43,6 +49,37 @@ const PostCards = ({
   const [isLoading, setIsLoading] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
   const [isCandidaturaLoading, setIsCandidaturaLoading] = useState(false)
+  const [showCandidaturaModal, setShowCandidaturaModal] = useState(false)
+  const [candidaturaData, setCandidaturaData] = useState<CandidaturaData>({
+    universidade: "",
+    semestre: "",
+    motivo: "",
+  })
+  const [quantidadeCandidaturas, setQuantidadeCandidaturas] =
+    useState<number>(0)
+
+  // Verificar número de candidaturas ao montar o componente
+  useState(() => {
+    if (post.candidaturas_abertas) {
+      checkCandidaturasCount()
+    }
+  })
+
+  // Verificar quantidade de candidaturas
+  const checkCandidaturasCount = async () => {
+    try {
+      const { count, error } = await supabase
+        .from("Candidaturas")
+        .select("*", { count: "exact" })
+        .eq("id_postagem", post.id)
+
+      if (error) throw error
+
+      setQuantidadeCandidaturas(count || 0)
+    } catch (error) {
+      console.error("Erro ao verificar candidaturas:", error)
+    }
+  }
 
   const handleEdit = () => {
     setIsEditing(true)
@@ -154,8 +191,33 @@ const PostCards = ({
     }
   }
 
+  const handleCandidaturaModalOpen = () => {
+    setErrorMessage("")
+    setShowCandidaturaModal(true)
+  }
+
+  const handleCandidaturaModalClose = () => {
+    setShowCandidaturaModal(false)
+    setCandidaturaData({
+      universidade: "",
+      semestre: "",
+      motivo: "",
+    })
+  }
+
+  const handleCandidaturaInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target
+    setCandidaturaData((prev) => ({
+      ...prev,
+      [name]: value,
+    }))
+  }
+
   // Função para candidatar-se à postagem
-  const handleCandidatura = async () => {
+  const handleCandidatura = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
     setIsCandidaturaLoading(true)
     setErrorMessage("")
 
@@ -203,6 +265,20 @@ const PostCards = ({
         return
       }
 
+      // Verificar se a postagem já tem 3 candidaturas
+      const { count, error: countError } = await supabase
+        .from("Candidaturas")
+        .select("*", { count: "exact" })
+        .eq("id_postagem", post.id)
+
+      if (countError) throw countError
+
+      if ((count || 0) >= 3) {
+        setErrorMessage("Esta postagem já atingiu o limite de 3 candidaturas")
+        setIsCandidaturaLoading(false)
+        return
+      }
+
       // Criar candidatura
       const { error } = await supabase.from("Candidaturas").insert([
         {
@@ -210,12 +286,19 @@ const PostCards = ({
           id_usuario: userData.id,
           data_candidatura: new Date().toISOString(),
           status: "Pendente",
+          universidade: candidaturaData.universidade,
+          semestre: candidaturaData.semestre,
+          motivo: candidaturaData.motivo,
         },
       ])
 
       if (error) throw error
 
-      // Notificar usuário do sucesso
+      // Atualizar contagem de candidaturas
+      await checkCandidaturasCount()
+
+      // Fechar modal e notificar usuário do sucesso
+      setShowCandidaturaModal(false)
       alert("Candidatura realizada com sucesso!")
     } catch (error: any) {
       console.error("Erro ao candidatar-se:", error)
@@ -330,9 +413,10 @@ const PostCards = ({
               onChange={(e) => setTipo(e.target.value)}
               required
             >
-              <option value="Projeto">Projeto</option>
+              <option value="Projeto de Pesquisa">Projeto de Pesquisa</option>
+              <option value="Projeto de Extensão">Projeto de Extensão</option>
+              <option value="Projeto de Ensino">Projeto de Ensino</option>
               <option value="TCC">TCC</option>
-              <option value="Pesquisa">Pesquisa</option>
               <option value="Monitoria">Monitoria</option>
               <option value="Outro">Outro</option>
             </select>
@@ -390,6 +474,96 @@ const PostCards = ({
     )
   }
 
+  // Renderizar modal de candidatura
+  const renderCandidaturaModal = () => {
+    if (!showCandidaturaModal) return null
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div className="bg-base-100 rounded-lg w-full max-w-md">
+          <div className="p-6">
+            <h3 className="text-xl font-semibold mb-4">Candidatar-se à vaga</h3>
+            <form onSubmit={handleCandidatura}>
+              {errorMessage && (
+                <div className="alert alert-error mb-4 text-sm">
+                  <span>{errorMessage}</span>
+                </div>
+              )}
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Universidade/Instituição</span>
+                </label>
+                <input
+                  type="text"
+                  name="universidade"
+                  placeholder="Informe sua universidade ou instituição"
+                  className="input input-bordered w-full"
+                  value={candidaturaData.universidade}
+                  onChange={handleCandidaturaInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Semestre atual</span>
+                </label>
+                <input
+                  type="text"
+                  name="semestre"
+                  placeholder="Ex: 5º semestre"
+                  className="input input-bordered w-full"
+                  value={candidaturaData.semestre}
+                  onChange={handleCandidaturaInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Motivo da candidatura</span>
+                </label>
+                <textarea
+                  name="motivo"
+                  placeholder="Explique porque você deseja se candidatar a esta vaga"
+                  className="textarea textarea-bordered w-full h-24"
+                  value={candidaturaData.motivo}
+                  onChange={handleCandidaturaInputChange}
+                  required
+                ></textarea>
+              </div>
+
+              <div className="flex justify-end space-x-2 mt-4">
+                <button
+                  type="button"
+                  onClick={handleCandidaturaModalClose}
+                  className="btn btn-outline btn-sm"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="btn btn-primary btn-sm"
+                  disabled={isCandidaturaLoading}
+                >
+                  {isCandidaturaLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-xs"></span>
+                      Enviando...
+                    </>
+                  ) : (
+                    "Enviar Candidatura"
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // Renderização normal do card quando não está em modo de edição
   return (
     <div className="bg-base-200 shadow rounded p-6 hover:shadow-lg transition duration-300">
@@ -437,29 +611,42 @@ const PostCards = ({
           {formatDate(post.prazo)}
         </div>
       )}
-      {post.candidaturas_abertas && userType === "Discente" && isFollowing && (
-        <div className="mt-4">
-          <button
-            onClick={handleCandidatura}
-            className="btn btn-primary btn-sm"
-            disabled={isCandidaturaLoading}
-          >
-            {isCandidaturaLoading ? (
-              <>
-                <span className="loading loading-spinner loading-xs"></span>
-                Candidatando...
-              </>
-            ) : (
-              "Candidatar-se"
-            )}
-          </button>
-          {errorMessage && (
-            <div className="alert alert-error mt-2 text-sm">
-              <span>{errorMessage}</span>
-            </div>
-          )}
+
+      {post.candidaturas_abertas && (
+        <div className="mt-2 text-sm text-gray-600">
+          <span className="font-medium">Candidaturas: </span>
+          {quantidadeCandidaturas}/3
         </div>
       )}
+
+      {post.candidaturas_abertas &&
+        userType === "Discente" &&
+        isFollowing &&
+        quantidadeCandidaturas < 3 && (
+          <div className="mt-4">
+            <button
+              onClick={handleCandidaturaModalOpen}
+              className="btn btn-primary btn-sm"
+              disabled={isCandidaturaLoading}
+            >
+              {isCandidaturaLoading ? (
+                <>
+                  <span className="loading loading-spinner loading-xs"></span>
+                  Candidatando...
+                </>
+              ) : (
+                "Candidatar-se"
+              )}
+            </button>
+            {errorMessage && !showCandidaturaModal && (
+              <div className="alert alert-error mt-2 text-sm">
+                <span>{errorMessage}</span>
+              </div>
+            )}
+          </div>
+        )}
+
+      {renderCandidaturaModal()}
     </div>
   )
 }

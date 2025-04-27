@@ -74,8 +74,12 @@ CREATE TABLE
     "postagem_id" UUID NOT NULL DEFAULT uuid_generate_v4 () UNIQUE,
     "usuario_id" UUID NOT NULL,
     "data_candidatura" TIMESTAMP NOT NULL,
+    "universidade" VARCHAR(255) NOT NULL,
+    "curso" VARCHAR(255) NOT NULL,
+    "semestre" INTEGER,
+    "motivo" TEXT,
     "status" VARCHAR(20) NOT NULL,
-    "data_aceitacao" TIMESTAMP NOT NULL,
+    "data_aceitacao" TIMESTAMP,
     "data_saida" TIMESTAMP,
     PRIMARY KEY ("id")
   );

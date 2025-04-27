@@ -1,3 +1,10 @@
+-- Permitir leitura pública dos dados
+CREATE POLICY "Usuarios_Read_Public" 
+  ON public."Usuarios"
+  FOR SELECT
+  TO authenticated
+  USING ( true );
+
 -- Permitir que os usuários vejam apenas seus próprios dados
 CREATE POLICY "Allow users to read their own information" ON public."Usuarios" FOR
 SELECT
