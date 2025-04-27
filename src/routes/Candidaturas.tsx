@@ -101,7 +101,7 @@ export default function Candidaturas() {
           universidade,
           semestre,
           motivo,
-          postagem:id_postagem (
+          postagem:postagem_id (
             id,
             titulo,
             descricao,
@@ -112,7 +112,7 @@ export default function Candidaturas() {
           )
         `
         )
-        .eq("id_usuario", userId)
+        .eq("usuario_id", userId)
         .order("data_candidatura", { ascending: false })
 
       if (error) throw error
@@ -166,7 +166,7 @@ export default function Candidaturas() {
         const { count } = await supabase
           .from("Candidaturas")
           .select("*", { count: "exact", head: true })
-          .eq("id_postagem", postagem.id)
+          .eq("postagem_id", postagem.id)
 
         return {
           id: postagem.id,

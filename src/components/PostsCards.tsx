@@ -71,7 +71,7 @@ const PostCards = ({
       const { count, error } = await supabase
         .from("Candidaturas")
         .select("*", { count: "exact" })
-        .eq("id_postagem", post.id)
+        .eq("postagem_id", post.id)
 
       if (error) throw error
 
@@ -283,7 +283,7 @@ const PostCards = ({
       const { error } = await supabase.from("Candidaturas").insert([
         {
           id_postagem: post.id,
-          id_usuario: userData.id,
+          usuario_id: userData.id,
           data_candidatura: new Date().toISOString(),
           status: "Pendente",
           universidade: candidaturaData.universidade,

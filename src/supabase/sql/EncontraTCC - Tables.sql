@@ -76,7 +76,7 @@ CREATE TABLE
     "data_candidatura" TIMESTAMP NOT NULL,
     "universidade" VARCHAR(255) NOT NULL,
     "curso" VARCHAR(255) NOT NULL,
-    "semestre" INTEGER,
+    "semestre" CHAR(2),
     "motivo" TEXT,
     "status" VARCHAR(20) NOT NULL,
     "data_aceitacao" TIMESTAMP,

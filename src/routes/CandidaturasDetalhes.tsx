@@ -21,8 +21,8 @@ interface Usuario {
 
 interface Candidatura {
   id: string
-  id_postagem: string
-  id_usuario: string
+  postagem_id: string
+  usuario_id: string
   data_candidatura: string
   status: string
   universidade: string
@@ -83,7 +83,7 @@ export default function CandidaturasDetalhes() {
         // Obter dados do usuário
         const { data: userData, error: userError } = await supabase
           .from("Usuarios")
-          .select("id, tipo_usuario")
+          .select("id, tipo")
           .eq("id_auth_users", user.id)
           .single()
 
@@ -91,7 +91,7 @@ export default function CandidaturasDetalhes() {
           throw new Error("Erro ao obter dados do usuário")
 
         // Se não for docente, redirecionar
-        if (userData.tipo_usuario !== "Docente") {
+        if (userData.tipo !== "Docente") {
           navigate("/candidaturas")
           return
         }
@@ -125,23 +125,21 @@ export default function CandidaturasDetalhes() {
             .select(
               `
               id,
-              id_postagem,
-              id_usuario,
+              postagem_id,
+              usuario_id,
               data_candidatura,
               status,
               universidade,
               semestre,
               motivo,
-              usuario:id_usuario(
+              usuario:usuario_id(
                 id,
                 nome,
-                email,
-                instituicao,
-                curso
+                email
               )
             `
             )
-            .eq("id_postagem", id)
+            .eq("postagem_id", id)
             .order("data_candidatura", { ascending: false }),
         ])
 

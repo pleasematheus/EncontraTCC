@@ -1,9 +1,7 @@
 -- Permitir leitura pública dos dados
-CREATE POLICY "Usuarios_Read_Public" 
-  ON public."Usuarios"
-  FOR SELECT
-  TO authenticated
-  USING ( true );
+CREATE POLICY "Usuarios_Read_Public" ON public."Usuarios" FOR
+SELECT
+  TO authenticated USING (true);
 
 -- Permitir que os usuários vejam apenas seus próprios dados
 CREATE POLICY "Allow users to read their own information" ON public."Usuarios" FOR
@@ -112,9 +110,9 @@ CREATE POLICY "usuario_comunidade_Delete_Self" ON "usuario_comunidade" FOR DELET
 CREATE POLICY "usuario_comunidade_Follow_Community" ON "usuario_comunidade" FOR INSERT
 WITH
   CHECK (
-    auth.uid () IS NOT NULL AND
-    tipo = 'membro' AND
-    auth.uid () = (
+    auth.uid () IS NOT NULL
+    AND tipo = 'membro'
+    AND auth.uid () = (
       SELECT
         id_auth_users
       FROM
@@ -125,8 +123,7 @@ WITH
   );
 
 -- Permitir que usuários deixem de seguir comunidades (remover registros com role='seguidor')
-CREATE POLICY "usuario_comunidade_Unfollow_Community" ON "usuario_comunidade" FOR DELETE
-USING (
+CREATE POLICY "usuario_comunidade_Unfollow_Community" ON "usuario_comunidade" FOR DELETE USING (
   auth.uid () = (
     SELECT
       id_auth_users
@@ -134,8 +131,8 @@ USING (
       "Usuarios"
     WHERE
       id = id_usuario
-  ) AND
-  tipo = 'membro'
+  )
+  AND tipo = 'membro'
 );
 
 /***Postagens***/
@@ -184,6 +181,58 @@ SELECT
 CREATE POLICY "Candidaturas_Insert_Authenticated" ON "Candidaturas" FOR INSERT
 WITH
   CHECK (auth.uid () IS NOT NULL);
+
+-- Permitir que candidatos atualizem suas próprias candidaturas
+CREATE POLICY "Candidaturas_Update_Owner" ON "Candidaturas" FOR
+UPDATE USING (
+  auth.uid () = (
+    SELECT
+      id_auth_users
+    FROM
+      "Usuarios"
+    WHERE
+      id = id_usuario
+  )
+);
+
+-- Permitir que o dono da postagem atualize as candidaturas (aprovar/rejeitar)
+CREATE POLICY "Candidaturas_Update_PostOwner" ON "Candidaturas" FOR
+UPDATE USING (
+  auth.uid () = (
+    SELECT
+      u.id_auth_users
+    FROM
+      "Postagens" p
+      JOIN "Usuarios" u ON p.id_usuario_criador = u.id
+    WHERE
+      p.id = id_postagem
+  )
+);
+
+-- Permitir que candidatos excluam suas próprias candidaturas
+CREATE POLICY "Candidaturas_Delete_Owner" ON "Candidaturas" FOR DELETE USING (
+  auth.uid () = (
+    SELECT
+      id_auth_users
+    FROM
+      "Usuarios"
+    WHERE
+      id = id_usuario
+  )
+);
+
+-- Permitir que o dono da postagem exclua candidaturas
+CREATE POLICY "Candidaturas_Delete_PostOwner" ON "Candidaturas" FOR DELETE USING (
+  auth.uid () = (
+    SELECT
+      u.id_auth_users
+    FROM
+      "Postagens" p
+      JOIN "Usuarios" u ON p.id_usuario_criador = u.id
+    WHERE
+      p.id = id_postagem
+  )
+);
 
 -- Política para o criador da comunidade atualizar os dados da comunidade
 CREATE POLICY "Comunidades_Update_Owner" ON "Comunidades" FOR
