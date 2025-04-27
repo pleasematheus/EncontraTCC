@@ -42,38 +42,40 @@ const normalizeNestedObject = <T extends object>(obj: any): T => {
 }
 
 // Número de itens por página
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 5
 
 export default function Candidaturas() {
   const [allCandidaturas, setAllCandidaturas] = useState<Candidatura[]>([])
-  const [paginatedCandidaturas, setPaginatedCandidaturas] = useState<Candidatura[]>([])
+  const [paginatedCandidaturas, setPaginatedCandidaturas] = useState<
+    Candidatura[]
+  >([])
   const [allPostagens, setAllPostagens] = useState<Postagem[]>([])
   const [paginatedPostagens, setPaginatedPostagens] = useState<Postagem[]>([])
   const [userType, setUserType] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
-  
+
   // Estado para paginação
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
 
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   // Efeito para atualizar os itens paginados quando mudar de página
   useEffect(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+
     if (userType === "Discente") {
-      setPaginatedCandidaturas(allCandidaturas.slice(startIndex, endIndex));
+      setPaginatedCandidaturas(allCandidaturas.slice(startIndex, endIndex))
     } else if (userType === "Docente") {
-      setPaginatedPostagens(allPostagens.slice(startIndex, endIndex));
+      setPaginatedPostagens(allPostagens.slice(startIndex, endIndex))
     }
-  }, [currentPage, userType, allCandidaturas, allPostagens]);
+  }, [currentPage, userType, allCandidaturas, allPostagens])
 
   // Hook para carregar os dados do usuário e candidaturas/postagens
   useEffect(() => {
@@ -161,9 +163,9 @@ export default function Candidaturas() {
         }
       })
 
-      setAllCandidaturas(processed as Candidatura[]);
-      setPaginatedCandidaturas(processed.slice(0, ITEMS_PER_PAGE));
-      setTotalPages(Math.ceil(processed.length / ITEMS_PER_PAGE) || 1);
+      setAllCandidaturas(processed as Candidatura[])
+      setPaginatedCandidaturas(processed.slice(0, ITEMS_PER_PAGE))
+      setTotalPages(Math.ceil(processed.length / ITEMS_PER_PAGE) || 1)
     } catch (err: any) {
       console.error(err)
       setError(`Erro ao buscar candidaturas: ${err.message}`)
@@ -207,10 +209,12 @@ export default function Candidaturas() {
         }
       })
 
-      const postagensComContagem = await Promise.all(postagensPromises);
-      setAllPostagens(postagensComContagem);
-      setPaginatedPostagens(postagensComContagem.slice(0, ITEMS_PER_PAGE));
-      setTotalPages(Math.ceil(postagensComContagem.length / ITEMS_PER_PAGE) || 1);
+      const postagensComContagem = await Promise.all(postagensPromises)
+      setAllPostagens(postagensComContagem)
+      setPaginatedPostagens(postagensComContagem.slice(0, ITEMS_PER_PAGE))
+      setTotalPages(
+        Math.ceil(postagensComContagem.length / ITEMS_PER_PAGE) || 1
+      )
     } catch (err: any) {
       console.error(err)
       setError(`Erro ao buscar postagens: ${err.message}`)
@@ -308,7 +312,7 @@ export default function Candidaturas() {
             </div>
           ))}
         </div>
-        
+
         {/* Paginação */}
         {allCandidaturas.length > ITEMS_PER_PAGE && (
           <Pagination
@@ -370,7 +374,7 @@ export default function Candidaturas() {
             </div>
           ))}
         </div>
-        
+
         {/* Paginação */}
         {allPostagens.length > ITEMS_PER_PAGE && (
           <Pagination
@@ -395,14 +399,18 @@ export default function Candidaturas() {
         <h1 className="text-3xl font-bold mb-2">Candidaturas</h1>
         {userType === "Discente" && (
           <p className="text-lg opacity-75 mb-4">
-            Acompanhe suas candidaturas 
-            {allCandidaturas.length > 0 && <span> ({allCandidaturas.length} total)</span>}
+            Acompanhe suas candidaturas
+            {allCandidaturas.length > 0 && (
+              <span> ({allCandidaturas.length} total)</span>
+            )}
           </p>
         )}
         {userType === "Docente" && (
           <p className="text-lg opacity-75 mb-4">
             Gerencie as candidaturas de suas postagens
-            {allPostagens.length > 0 && <span> ({allPostagens.length} postagens)</span>}
+            {allPostagens.length > 0 && (
+              <span> ({allPostagens.length} postagens)</span>
+            )}
           </p>
         )}
 

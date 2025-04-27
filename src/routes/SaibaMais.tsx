@@ -1,7 +1,15 @@
-import { Link } from "react-router-dom";
-import { ArrowLeft, Globe, Book, Users, Award, BookOpen, PenTool } from "lucide-react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { Link } from "react-router-dom"
+import {
+  ArrowLeft,
+  Globe,
+  Book,
+  Users,
+  Award,
+  BookOpen,
+  PenTool,
+} from "lucide-react"
+import Header from "@/components/Header"
+import Footer from "@/components/Footer"
 
 const SaibaMais = () => {
   return (
@@ -191,6 +199,6 @@ const SaibaMais = () => {
       <Footer />
     </>
   )
-};
+}
 
-export default SaibaMais;
+export default SaibaMais

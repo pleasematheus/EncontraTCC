@@ -30,7 +30,7 @@ interface UserInfo {
   tipo: string | null
 }
 
-const POSTS_PER_PAGE = 5; // Número de posts por página
+const POSTS_PER_PAGE = 5 // Número de posts por página
 
 export default function CommunityPage() {
   const {} = useTheme()
@@ -48,16 +48,16 @@ export default function CommunityPage() {
 
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   // Efeito para paginar os posts quando mudar a página atual
   useEffect(() => {
-    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-    const endIndex = startIndex + POSTS_PER_PAGE;
-    setPaginatedPosts(allPosts.slice(startIndex, endIndex));
-  }, [currentPage, allPosts]);
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
+    const endIndex = startIndex + POSTS_PER_PAGE
+    setPaginatedPosts(allPosts.slice(startIndex, endIndex))
+  }, [currentPage, allPosts])
 
   // Verificar o tipo de usuário atual e seu ID
   useEffect(() => {
@@ -138,14 +138,14 @@ export default function CommunityPage() {
         "id, comunidade_id, titulo, descricao, data_criacao, data_atualizacao, tipo, prazo, id_usuario_criador, candidaturas_abertas"
       )
       .eq("comunidade_id", community.id)
-      .order('data_criacao', { ascending: false })
+      .order("data_criacao", { ascending: false })
 
     if (error) {
       console.error("Error fetching posts:", error)
     } else {
-      setAllPosts(data || []);
-      setPaginatedPosts((data || []).slice(0, POSTS_PER_PAGE));
-      setTotalPages(Math.ceil((data || []).length / POSTS_PER_PAGE) || 1);
+      setAllPosts(data || [])
+      setPaginatedPosts((data || []).slice(0, POSTS_PER_PAGE))
+      setTotalPages(Math.ceil((data || []).length / POSTS_PER_PAGE) || 1)
     }
   }
 
@@ -309,7 +309,7 @@ export default function CommunityPage() {
 
           {/* Paginação */}
           {allPosts.length > POSTS_PER_PAGE && (
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}

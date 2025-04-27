@@ -67,7 +67,7 @@ const CadastroPage = () => {
           <ArrowLeft size={16} />
           Voltar à página inicial
         </Link>
-        
+
         <div className="card w-full shadow-xl bg-base-200">
           <div className="card-body">
             <h2 className="text-center text-2xl font-bold text-primary">

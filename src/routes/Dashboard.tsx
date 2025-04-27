@@ -28,14 +28,18 @@ interface PostagemRecente {
   criador_nome: string
 }
 
-const POSTS_PER_PAGE = 5; // Número de posts por página
+const POSTS_PER_PAGE = 5 // Número de posts por página
 
 const Dashboard = () => {
   const {} = useTheme()
 
   const [userData, setUserData] = useState<UserData | null>(null)
-  const [todasPostagensRecentes, setTodasPostagensRecentes] = useState<PostagemRecente[]>([])
-  const [postagensExibidas, setPostagensExibidas] = useState<PostagemRecente[]>([])
+  const [todasPostagensRecentes, setTodasPostagensRecentes] = useState<
+    PostagemRecente[]
+  >([])
+  const [postagensExibidas, setPostagensExibidas] = useState<PostagemRecente[]>(
+    []
+  )
   const [loading, setLoading] = useState(true)
   const [loadingPosts, setLoadingPosts] = useState(true)
   const [currentPage, setCurrentPage] = useState(1)
@@ -43,15 +47,15 @@ const Dashboard = () => {
 
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
+    setCurrentPage(page)
+  }
 
   // Efeito para atualizar as postagens exibidas com base na página atual
   useEffect(() => {
-    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
-    const endIndex = startIndex + POSTS_PER_PAGE;
-    setPostagensExibidas(todasPostagensRecentes.slice(startIndex, endIndex));
-  }, [currentPage, todasPostagensRecentes]);
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE
+    const endIndex = startIndex + POSTS_PER_PAGE
+    setPostagensExibidas(todasPostagensRecentes.slice(startIndex, endIndex))
+  }, [currentPage, todasPostagensRecentes])
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -132,11 +136,11 @@ const Dashboard = () => {
           console.error("Erro ao obter postagens seguidas:", error)
           setTodasPostagensRecentes([])
         } else {
-          setTodasPostagensRecentes(data);
+          setTodasPostagensRecentes(data)
           // Define o número total de páginas
-          setTotalPages(Math.ceil(data.length / POSTS_PER_PAGE) || 1);
+          setTotalPages(Math.ceil(data.length / POSTS_PER_PAGE) || 1)
           // Define a primeira página de postagens
-          setPostagensExibidas(data.slice(0, POSTS_PER_PAGE));
+          setPostagensExibidas(data.slice(0, POSTS_PER_PAGE))
         }
       } catch (err) {
         console.error("Erro inesperado ao carregar postagens:", err)
@@ -275,9 +279,9 @@ const Dashboard = () => {
                         </div>
                       ))}
                     </div>
-                    
+
                     {/* Componente de paginação */}
-                    <Pagination 
+                    <Pagination
                       currentPage={currentPage}
                       totalPages={totalPages}
                       onPageChange={handlePageChange}
@@ -309,10 +313,7 @@ const Dashboard = () => {
                   <Link to="/comunidades" className="btn btn-outline btn-sm">
                     Explorar Comunidades
                   </Link>
-                  <Link
-                    to="/candidaturas"
-                    className="btn btn-outline btn-sm"
-                  >
+                  <Link to="/candidaturas" className="btn btn-outline btn-sm">
                     Minhas Candidaturas
                   </Link>
                 </div>

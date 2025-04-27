@@ -13,6 +13,7 @@ interface Post {
   data_atualizacao?: string
   id_usuario_criador?: string
   candidaturas_abertas?: boolean
+  candidatos_unicos?: number
 }
 
 interface CandidaturaData {
@@ -55,29 +56,38 @@ const PostCards = ({
     semestre: "",
     motivo: "",
   })
-  const [quantidadeCandidaturas, setQuantidadeCandidaturas] =
-    useState<number>(0)
+  const [quantidadeUsuariosCandidatos, setQuantidadeUsuariosCandidatos] =
+    useState<number>(post.candidatos_unicos || 0)
 
-  // Verificar quantidade de candidaturas
-  const checkCandidaturasCount = async () => {
+  // Verificar quantidade de candidaturas únicas (usuários distintos)
+  const checkUniqueApplicantsCount = async () => {
     try {
-      const { count, error } = await supabase
+      if (post.candidatos_unicos !== undefined) {
+        // Se já temos o valor do banco através do post, use-o
+        setQuantidadeUsuariosCandidatos(post.candidatos_unicos)
+        return
+      }
+
+      // Caso contrário, consulte a contagem de usuários distintos
+      const { data, error } = await supabase
         .from("Candidaturas")
-        .select("*", { count: "exact" })
-        .eq("postagem_id", post.id)
+        .select("usuario_id")
+        .eq("id_postagem", post.id)
 
       if (error) throw error
 
-      setQuantidadeCandidaturas(count || 0)
+      // Contar usuários únicos usando um Set para remover duplicatas
+      const uniqueUserIds = new Set(data?.map((item) => item.usuario_id))
+      setQuantidadeUsuariosCandidatos(uniqueUserIds.size)
     } catch (error) {
-      console.error("Erro ao verificar candidaturas:", error)
+      console.error("Erro ao verificar candidaturas únicas:", error)
     }
   }
-    
-  // Verificar número de candidaturas ao montar o componente
+
+  // Verificar número de candidaturas únicas ao montar o componente
   useEffect(() => {
     if (post.candidaturas_abertas) {
-      checkCandidaturasCount()
+      checkUniqueApplicantsCount()
     }
   }, [])
 
@@ -252,7 +262,7 @@ const PostCards = ({
           .from("Candidaturas")
           .select("id")
           .eq("id_postagem", post.id)
-          .eq("id_usuario", userData.id)
+          .eq("usuario_id", userData.id)
           .maybeSingle()
 
       if (candidaturaError) {
@@ -265,16 +275,20 @@ const PostCards = ({
         return
       }
 
-      // Verificar se a postagem já tem 3 candidaturas
-      const { count, error: countError } = await supabase
+      // Verificar se a postagem já tem 3 candidatos únicos
+      const { data: uniqueApplicants, error: countError } = await supabase
         .from("Candidaturas")
-        .select("*", { count: "exact" })
+        .select("usuario_id")
         .eq("id_postagem", post.id)
 
       if (countError) throw countError
 
-      if ((count || 0) >= 3) {
-        setErrorMessage("Esta postagem já atingiu o limite de 3 candidaturas")
+      // Contar usuários únicos usando um Set
+      const uniqueUserIds = new Set(
+        uniqueApplicants?.map((item) => item.usuario_id) || []
+      )
+      if (uniqueUserIds.size >= 3) {
+        setErrorMessage("Esta postagem já atingiu o limite de 3 candidatos")
         setIsCandidaturaLoading(false)
         return
       }
@@ -294,8 +308,8 @@ const PostCards = ({
 
       if (error) throw error
 
-      // Atualizar contagem de candidaturas
-      await checkCandidaturasCount()
+      // Atualizar contagem de candidatos únicos
+      await checkUniqueApplicantsCount()
 
       // Fechar modal e notificar usuário do sucesso
       setShowCandidaturaModal(false)
@@ -614,15 +628,15 @@ const PostCards = ({
 
       {post.candidaturas_abertas && (
         <div className="mt-2 text-sm text-gray-600">
-          <span className="font-medium">Candidaturas: </span>
-          {quantidadeCandidaturas}/3
+          <span className="font-medium">Pessoas candidatas: </span>
+          {quantidadeUsuariosCandidatos}/3
         </div>
       )}
 
       {post.candidaturas_abertas &&
         userType === "Discente" &&
         isFollowing &&
-        quantidadeCandidaturas < 3 && (
+        quantidadeUsuariosCandidatos < 3 && (
           <div className="mt-4">
             <button
               onClick={handleCandidaturaModalOpen}

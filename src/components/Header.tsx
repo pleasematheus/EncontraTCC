@@ -185,7 +185,7 @@ export default function Header() {
               </a>
             </li>
             <li>
-              <a href="/emalta" className="btn btn-ghost btn-sm break-keep">
+              <a href="/em-alta" className="btn btn-ghost btn-sm break-keep">
                 Em alta
               </a>
             </li>
@@ -322,7 +322,7 @@ export default function Header() {
             </li>
             <li>
               <a
-                href="/emalta"
+                href="/em-alta"
                 className="block py-2 px-4 hover:bg-base-200 rounded-full"
               >
                 Em alta

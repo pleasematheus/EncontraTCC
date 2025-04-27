@@ -14,6 +14,7 @@ import Candidaturas from "./Candidaturas"
 import CandidaturasDetalhes from "./CandidaturasDetalhes"
 import SearchResults from "./SearchResults"
 import SaibaMais from "./SaibaMais"
+import TrendingPosts from "./TrendingPosts"
 
 const router = createBrowserRouter([
   {
@@ -32,6 +33,14 @@ const router = createBrowserRouter([
   {
     path: "/saiba-mais",
     element: <SaibaMais />,
+  },
+  {
+    path: "/em-alta",
+    element: (
+      <ProtectedRoute>
+        <TrendingPosts />
+      </ProtectedRoute>
+    ),
   },
   {
     path: "/dashboard",

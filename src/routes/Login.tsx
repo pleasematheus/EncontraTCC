@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react"
 import supabase from "../utils/supabase"
 
 const LoginPage = () => {
-  const { } = useTheme()
+  const {} = useTheme()
 
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
@@ -41,10 +41,12 @@ const LoginPage = () => {
           <ArrowLeft size={16} />
           Voltar à página inicial
         </Link>
-        
+
         <div className="card w-full shadow-xl bg-base-200">
           <div className="card-body">
-            <h2 className="text-center text-2xl font-bold text-primary">Login</h2>
+            <h2 className="text-center text-2xl font-bold text-primary">
+              Login
+            </h2>
             <form onSubmit={handleLogin}>
               <div className="form-control w-full">
                 <label className="label">

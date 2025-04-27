@@ -19,14 +19,16 @@ interface Community {
   is_following?: boolean // Adicionado para controle de seguidores
 }
 
-const ITEMS_PER_PAGE = 9; // Número de comunidades por página
+const ITEMS_PER_PAGE = 9 // Número de comunidades por página
 
 export default function Communities() {
   const {} = useTheme()
 
   const [loading, setLoading] = useState(true)
   const [allCommunities, setAllCommunities] = useState<Community[]>([])
-  const [paginatedCommunities, setPaginatedCommunities] = useState<Community[]>([])
+  const [paginatedCommunities, setPaginatedCommunities] = useState<Community[]>(
+    []
+  )
   const [currentPage, setCurrentPage] = useState(1)
   const [totalPages, setTotalPages] = useState(1)
   const [userType, setUserType] = useState<string | null>(null)
@@ -39,16 +41,16 @@ export default function Communities() {
 
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
+    setCurrentPage(page)
+    window.scrollTo({ top: 0, behavior: "smooth" })
+  }
 
   // Efeito para paginar as comunidades quando mudar a página atual
   useEffect(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    const endIndex = startIndex + ITEMS_PER_PAGE;
-    setPaginatedCommunities(allCommunities.slice(startIndex, endIndex));
-  }, [currentPage, allCommunities]);
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+    const endIndex = startIndex + ITEMS_PER_PAGE
+    setPaginatedCommunities(allCommunities.slice(startIndex, endIndex))
+  }, [currentPage, allCommunities])
 
   // Busca o tipo do usuário autenticado e seu ID
   useEffect(() => {
@@ -82,7 +84,7 @@ export default function Communities() {
 
   // Função para buscar e atualizar a lista de comunidades junto com status de seguidor
   const getComunidades = async () => {
-    setLoading(true);
+    setLoading(true)
 
     if (!userId) {
       // Busca todas as comunidades (sem limite)
@@ -94,9 +96,9 @@ export default function Communities() {
       if (error) {
         console.error("Erro ao buscar comunidades:", error)
       } else {
-        setAllCommunities(data as Community[]);
-        setPaginatedCommunities(data.slice(0, ITEMS_PER_PAGE));
-        setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE) || 1);
+        setAllCommunities(data as Community[])
+        setPaginatedCommunities(data.slice(0, ITEMS_PER_PAGE))
+        setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE) || 1)
       }
       setLoading(false)
       return
@@ -138,9 +140,13 @@ export default function Communities() {
       })
     )
 
-    setAllCommunities(communitiesWithFollowStatus);
-    setPaginatedCommunities(communitiesWithFollowStatus.slice(0, ITEMS_PER_PAGE));
-    setTotalPages(Math.ceil(communitiesWithFollowStatus.length / ITEMS_PER_PAGE) || 1);
+    setAllCommunities(communitiesWithFollowStatus)
+    setPaginatedCommunities(
+      communitiesWithFollowStatus.slice(0, ITEMS_PER_PAGE)
+    )
+    setTotalPages(
+      Math.ceil(communitiesWithFollowStatus.length / ITEMS_PER_PAGE) || 1
+    )
     setLoading(false)
   }
 
@@ -229,7 +235,7 @@ export default function Communities() {
       <Header />
       <main className="px-4 py-8 min-h-screen relative pb-32">
         <h1 className="text-3xl font-bold text-center mb-8">Comunidades</h1>
-        
+
         {allCommunities.length > 0 && (
           <p className="text-center text-gray-500 mb-6">
             {allCommunities.length} comunidades encontradas
@@ -250,9 +256,9 @@ export default function Communities() {
               communities={paginatedCommunities}
               userId={userId || undefined}
             />
-            
+
             {/* Componente de paginação */}
-            <Pagination 
+            <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
               onPageChange={handlePageChange}
