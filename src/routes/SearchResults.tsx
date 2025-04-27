@@ -59,7 +59,6 @@ export default function SearchResults() {
 
   useEffect(() => {
     // Implementa a paginação dos resultados atuais
-    const currentTab = activeTab === "posts" ? allPosts : allCommunities;
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
     

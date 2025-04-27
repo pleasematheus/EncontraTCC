@@ -2,7 +2,6 @@ import { Link } from "react-router-dom";
 import { ArrowLeft, Globe, Book, Users, Award, BookOpen, PenTool } from "lucide-react";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
-import StaggeredFadeIn from "@/components/StaggeredFadeIn";
 
 const SaibaMais = () => {
   return (
