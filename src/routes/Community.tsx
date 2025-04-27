@@ -2,6 +2,7 @@ import { useTheme } from "@/hooks/useTheme"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import PostCards from "@/components/PostsCards"
+import Pagination from "@/components/Pagination"
 import supabase from "@/utils/supabase"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
@@ -29,16 +30,34 @@ interface UserInfo {
   tipo: string | null
 }
 
+const POSTS_PER_PAGE = 5; // Número de posts por página
+
 export default function CommunityPage() {
   const {} = useTheme()
   const { discriminador } = useParams<{ discriminador: string }>()
-  const [posts, setPosts] = useState<Post[]>([])
+  const [allPosts, setAllPosts] = useState<Post[]>([])
+  const [paginatedPosts, setPaginatedPosts] = useState<Post[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [community, setCommunity] = useState<Community | null>(null)
   const [userInfo, setUserInfo] = useState<UserInfo>({ id: null, tipo: null })
   const [isFollowing, setIsFollowing] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Efeito para paginar os posts quando mudar a página atual
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * POSTS_PER_PAGE;
+    const endIndex = startIndex + POSTS_PER_PAGE;
+    setPaginatedPosts(allPosts.slice(startIndex, endIndex));
+  }, [currentPage, allPosts]);
 
   // Verificar o tipo de usuário atual e seu ID
   useEffect(() => {
@@ -119,11 +138,14 @@ export default function CommunityPage() {
         "id, comunidade_id, titulo, descricao, data_criacao, data_atualizacao, tipo, prazo, id_usuario_criador, candidaturas_abertas"
       )
       .eq("comunidade_id", community.id)
+      .order('data_criacao', { ascending: false })
 
     if (error) {
       console.error("Error fetching posts:", error)
     } else {
-      setPosts(data || [])
+      setAllPosts(data || []);
+      setPaginatedPosts((data || []).slice(0, POSTS_PER_PAGE));
+      setTotalPages(Math.ceil((data || []).length / POSTS_PER_PAGE) || 1);
     }
   }
 
@@ -259,12 +281,15 @@ export default function CommunityPage() {
           {community && (
             <div className="mb-6 text-sm text-gray-600">
               <p>Total de membros: {community.total_usuarios}</p>
+              {allPosts.length > 0 && (
+                <p className="mt-1">Total de postagens: {allPosts.length}</p>
+              )}
             </div>
           )}
 
-          <div className="grid grid-cols-1 gap-4">
-            {posts.length > 0 ? (
-              posts.map((post) => (
+          <div className="grid grid-cols-1 gap-4 mb-6">
+            {paginatedPosts.length > 0 ? (
+              paginatedPosts.map((post) => (
                 <PostCards
                   key={post.id}
                   post={post}
@@ -276,11 +301,20 @@ export default function CommunityPage() {
                 />
               ))
             ) : (
-              <p className="text-center text-gray-600">
+              <p className="text-center text-gray-600 py-12 bg-base-200 rounded-lg">
                 Ainda não há posts nessa comunidade
               </p>
             )}
           </div>
+
+          {/* Paginação */}
+          {allPosts.length > POSTS_PER_PAGE && (
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          )}
         </div>
       </div>
 

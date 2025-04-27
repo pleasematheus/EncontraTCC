@@ -4,6 +4,7 @@ import { ArrowLeft, Clock, Check, X } from "lucide-react"
 import supabase from "@/utils/supabase"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
+import Pagination from "@/components/Pagination"
 
 // Interfaces mais simples e precisas
 interface Comunidade {
@@ -40,12 +41,39 @@ const normalizeNestedObject = <T extends object>(obj: any): T => {
   return (obj || {}) as T
 }
 
+// Número de itens por página
+const ITEMS_PER_PAGE = 5;
+
 export default function Candidaturas() {
-  const [candidaturas, setCandidaturas] = useState<Candidatura[]>([])
-  const [postagens, setPostagens] = useState<Postagem[]>([])
+  const [allCandidaturas, setAllCandidaturas] = useState<Candidatura[]>([])
+  const [paginatedCandidaturas, setPaginatedCandidaturas] = useState<Candidatura[]>([])
+  const [allPostagens, setAllPostagens] = useState<Postagem[]>([])
+  const [paginatedPostagens, setPaginatedPostagens] = useState<Postagem[]>([])
   const [userType, setUserType] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
+  
+  // Estado para paginação
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Efeito para atualizar os itens paginados quando mudar de página
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    
+    if (userType === "Discente") {
+      setPaginatedCandidaturas(allCandidaturas.slice(startIndex, endIndex));
+    } else if (userType === "Docente") {
+      setPaginatedPostagens(allPostagens.slice(startIndex, endIndex));
+    }
+  }, [currentPage, userType, allCandidaturas, allPostagens]);
 
   // Hook para carregar os dados do usuário e candidaturas/postagens
   useEffect(() => {
@@ -133,7 +161,9 @@ export default function Candidaturas() {
         }
       })
 
-      setCandidaturas(processed as Candidatura[])
+      setAllCandidaturas(processed as Candidatura[]);
+      setPaginatedCandidaturas(processed.slice(0, ITEMS_PER_PAGE));
+      setTotalPages(Math.ceil(processed.length / ITEMS_PER_PAGE) || 1);
     } catch (err: any) {
       console.error(err)
       setError(`Erro ao buscar candidaturas: ${err.message}`)
@@ -177,8 +207,10 @@ export default function Candidaturas() {
         }
       })
 
-      const postagensComContagem = await Promise.all(postagensPromises)
-      setPostagens(postagensComContagem)
+      const postagensComContagem = await Promise.all(postagensPromises);
+      setAllPostagens(postagensComContagem);
+      setPaginatedPostagens(postagensComContagem.slice(0, ITEMS_PER_PAGE));
+      setTotalPages(Math.ceil(postagensComContagem.length / ITEMS_PER_PAGE) || 1);
     } catch (err: any) {
       console.error(err)
       setError(`Erro ao buscar postagens: ${err.message}`)
@@ -220,7 +252,7 @@ export default function Candidaturas() {
 
   // Views memoizadas para evitar re-renderizações desnecessárias
   const discenteView = useMemo(() => {
-    if (candidaturas.length === 0) {
+    if (allCandidaturas.length === 0) {
       return (
         <div className="text-center py-12">
           <p className="text-lg mb-4">Você ainda não possui candidaturas.</p>
@@ -232,54 +264,66 @@ export default function Candidaturas() {
     }
 
     return (
-      <div className="grid gap-6">
-        {candidaturas.map((c) => (
-          <div key={c.id} className="bg-base-200 p-6 rounded-lg shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-1">
-                  {c.postagem.titulo}
-                </h3>
-                <p className="text-sm opacity-70 mb-2">
-                  Comunidade: {c.postagem.comunidade.nome}
-                </p>
+      <>
+        <div className="grid gap-6">
+          {paginatedCandidaturas.map((c) => (
+            <div key={c.id} className="bg-base-200 p-6 rounded-lg shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">
+                    {c.postagem.titulo}
+                  </h3>
+                  <p className="text-sm opacity-70 mb-2">
+                    Comunidade: {c.postagem.comunidade.nome}
+                  </p>
+                </div>
+                {renderStatusBadge(c.status)}
               </div>
-              {renderStatusBadge(c.status)}
-            </div>
-            <div className="divider my-2"></div>
-            <p>
-              <span className="font-medium">Data da candidatura:</span>{" "}
-              {formatDate(c.data_candidatura)}
-            </p>
-            <p>
-              <span className="font-medium">Universidade:</span>{" "}
-              {c.universidade}
-            </p>
-            <p>
-              <span className="font-medium">Semestre:</span> {c.semestre}
-            </p>
-            {c.status === "Aprovado" && (
-              <div className="alert alert-success mt-4">
-                <Check size={16} />
-                <span>Parabéns! Sua candidatura foi aprovada.</span>
+              <div className="divider my-2"></div>
+              <p>
+                <span className="font-medium">Data da candidatura:</span>{" "}
+                {formatDate(c.data_candidatura)}
+              </p>
+              <p>
+                <span className="font-medium">Universidade:</span>{" "}
+                {c.universidade}
+              </p>
+              <p>
+                <span className="font-medium">Semestre:</span> {c.semestre}
+              </p>
+              {c.status === "Aprovado" && (
+                <div className="alert alert-success mt-4">
+                  <Check size={16} />
+                  <span>Parabéns! Sua candidatura foi aprovada.</span>
+                </div>
+              )}
+              <div className="mt-4">
+                <Link
+                  to={`/c/${c.postagem.comunidade.discriminador}`}
+                  className="btn btn-outline btn-sm"
+                >
+                  Ver Comunidade
+                </Link>
               </div>
-            )}
-            <div className="mt-4">
-              <Link
-                to={`/c/${c.postagem.comunidade.discriminador}`}
-                className="btn btn-outline btn-sm"
-              >
-                Ver Comunidade
-              </Link>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+        
+        {/* Paginação */}
+        {allCandidaturas.length > ITEMS_PER_PAGE && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            className="mt-6"
+          />
+        )}
+      </>
     )
-  }, [candidaturas])
+  }, [paginatedCandidaturas, allCandidaturas.length, currentPage, totalPages])
 
   const docenteView = useMemo(() => {
-    if (postagens.length === 0) {
+    if (allPostagens.length === 0) {
       return (
         <div className="text-center py-12">
           <p className="text-lg mb-4">
@@ -293,40 +337,52 @@ export default function Candidaturas() {
     }
 
     return (
-      <div className="grid gap-6">
-        {postagens.map((p) => (
-          <div key={p.id} className="bg-base-200 p-6 rounded-lg shadow-sm">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-xl font-semibold mb-1">{p.titulo}</h3>
-                <p className="text-sm opacity-70 mb-2">
-                  Comunidade: {p.comunidade.nome}
-                </p>
+      <>
+        <div className="grid gap-6">
+          {paginatedPostagens.map((p) => (
+            <div key={p.id} className="bg-base-200 p-6 rounded-lg shadow-sm">
+              <div className="flex justify-between items-start mb-4">
+                <div>
+                  <h3 className="text-xl font-semibold mb-1">{p.titulo}</h3>
+                  <p className="text-sm opacity-70 mb-2">
+                    Comunidade: {p.comunidade.nome}
+                  </p>
+                </div>
+                <div className="badge badge-primary badge-lg">
+                  {p.candidaturas_count} candidatura(s)
+                </div>
               </div>
-              <div className="badge badge-primary badge-lg">
-                {p.candidaturas_count} candidatura(s)
+              <p className="mb-4 line-clamp-2">{p.descricao}</p>
+              <div className="mt-4">
+                <Link
+                  to={`/candidaturas/${p.id}`}
+                  className="btn btn-primary btn-sm"
+                >
+                  Ver Candidaturas
+                </Link>
+                <Link
+                  to={`/c/${p.comunidade.discriminador}`}
+                  className="btn btn-outline btn-sm ml-2"
+                >
+                  Ver Comunidade
+                </Link>
               </div>
             </div>
-            <p className="mb-4 line-clamp-2">{p.descricao}</p>
-            <div className="mt-4">
-              <Link
-                to={`/candidaturas/${p.id}`}
-                className="btn btn-primary btn-sm"
-              >
-                Ver Candidaturas
-              </Link>
-              <Link
-                to={`/c/${p.comunidade.discriminador}`}
-                className="btn btn-outline btn-sm ml-2"
-              >
-                Ver Comunidade
-              </Link>
-            </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+        
+        {/* Paginação */}
+        {allPostagens.length > ITEMS_PER_PAGE && (
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={handlePageChange}
+            className="mt-6"
+          />
+        )}
+      </>
     )
-  }, [postagens])
+  }, [paginatedPostagens, allPostagens.length, currentPage, totalPages])
 
   // Componente principal simplificado
   return (
@@ -338,11 +394,15 @@ export default function Candidaturas() {
         </Link>
         <h1 className="text-3xl font-bold mb-2">Candidaturas</h1>
         {userType === "Discente" && (
-          <p className="text-lg opacity-75">Acompanhe suas candidaturas</p>
+          <p className="text-lg opacity-75 mb-4">
+            Acompanhe suas candidaturas 
+            {allCandidaturas.length > 0 && <span> ({allCandidaturas.length} total)</span>}
+          </p>
         )}
         {userType === "Docente" && (
-          <p className="text-lg opacity-75">
+          <p className="text-lg opacity-75 mb-4">
             Gerencie as candidaturas de suas postagens
+            {allPostagens.length > 0 && <span> ({allPostagens.length} postagens)</span>}
           </p>
         )}
 

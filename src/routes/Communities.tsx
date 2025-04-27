@@ -3,6 +3,7 @@ import { useTheme } from "@/hooks/useTheme"
 import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 import CommunityCards from "@/components/CommunityCards"
+import Pagination from "@/components/Pagination"
 import supabase from "@/utils/supabase"
 import { PlusCircle } from "lucide-react"
 
@@ -18,11 +19,16 @@ interface Community {
   is_following?: boolean // Adicionado para controle de seguidores
 }
 
+const ITEMS_PER_PAGE = 9; // Número de comunidades por página
+
 export default function Communities() {
   const {} = useTheme()
 
   const [loading, setLoading] = useState(true)
-  const [communities, setCommunities] = useState<Community[]>([])
+  const [allCommunities, setAllCommunities] = useState<Community[]>([])
+  const [paginatedCommunities, setPaginatedCommunities] = useState<Community[]>([])
+  const [currentPage, setCurrentPage] = useState(1)
+  const [totalPages, setTotalPages] = useState(1)
   const [userType, setUserType] = useState<string | null>(null)
   const [modalOpen, setModalOpen] = useState(false)
   const [nome, setNome] = useState("")
@@ -30,6 +36,19 @@ export default function Communities() {
   const [discriminador, setDiscriminador] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [userId, setUserId] = useState<string | null>(null) // ID do usuário atual
+
+  // Função para lidar com a mudança de página
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Efeito para paginar as comunidades quando mudar a página atual
+  useEffect(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    setPaginatedCommunities(allCommunities.slice(startIndex, endIndex));
+  }, [currentPage, allCommunities]);
 
   // Busca o tipo do usuário autenticado e seu ID
   useEffect(() => {
@@ -63,28 +82,31 @@ export default function Communities() {
 
   // Função para buscar e atualizar a lista de comunidades junto com status de seguidor
   const getComunidades = async () => {
+    setLoading(true);
+
     if (!userId) {
+      // Busca todas as comunidades (sem limite)
       const { data, error } = await supabase
         .from("Comunidades")
         .select("*")
         .order("data_criacao", { ascending: false })
-        .limit(10)
 
       if (error) {
         console.error("Erro ao buscar comunidades:", error)
       } else {
-        setCommunities(data as Community[])
+        setAllCommunities(data as Community[]);
+        setPaginatedCommunities(data.slice(0, ITEMS_PER_PAGE));
+        setTotalPages(Math.ceil(data.length / ITEMS_PER_PAGE) || 1);
       }
       setLoading(false)
       return
     }
 
-    // Busca comunidades
+    // Busca todas as comunidades (sem limite)
     const { data: communitiesData, error: communitiesError } = await supabase
       .from("Comunidades")
       .select("*")
       .order("data_criacao", { ascending: false })
-      .limit(10)
 
     if (communitiesError) {
       console.error("Erro ao buscar comunidades:", communitiesError)
@@ -116,7 +138,9 @@ export default function Communities() {
       })
     )
 
-    setCommunities(communitiesWithFollowStatus)
+    setAllCommunities(communitiesWithFollowStatus);
+    setPaginatedCommunities(communitiesWithFollowStatus.slice(0, ITEMS_PER_PAGE));
+    setTotalPages(Math.ceil(communitiesWithFollowStatus.length / ITEMS_PER_PAGE) || 1);
     setLoading(false)
   }
 
@@ -194,6 +218,8 @@ export default function Communities() {
       setModalOpen(false)
       // Atualiza a lista de comunidades para incluir a nova.
       await getComunidades()
+      // Volta para a primeira página após criar uma nova comunidade
+      setCurrentPage(1)
     }
     setSubmitting(false)
   }
@@ -203,20 +229,35 @@ export default function Communities() {
       <Header />
       <main className="px-4 py-8 min-h-screen relative pb-32">
         <h1 className="text-3xl font-bold text-center mb-8">Comunidades</h1>
+        
+        {allCommunities.length > 0 && (
+          <p className="text-center text-gray-500 mb-6">
+            {allCommunities.length} comunidades encontradas
+          </p>
+        )}
 
         {loading ? (
           <div className="flex justify-center items-center py-20">
             <span className="loading loading-spinner loading-lg text-primary"></span>
           </div>
-        ) : communities.length === 0 ? (
+        ) : allCommunities.length === 0 ? (
           <p className="text-center text-gray-500 mt-12">
             Ainda não há comunidades cadastradas.
           </p>
         ) : (
-          <CommunityCards
-            communities={communities}
-            userId={userId || undefined}
-          />
+          <>
+            <CommunityCards
+              communities={paginatedCommunities}
+              userId={userId || undefined}
+            />
+            
+            {/* Componente de paginação */}
+            <Pagination 
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
+          </>
         )}
       </main>
 

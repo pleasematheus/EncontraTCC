@@ -1,6 +1,7 @@
 import { useState } from "react"
-import { useNavigate } from "react-router-dom"
+import { useNavigate, Link } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
+import { ArrowLeft } from "lucide-react"
 import supabase from "../utils/supabase"
 
 const LoginPage = () => {
@@ -33,49 +34,57 @@ const LoginPage = () => {
   }
 
   return (
-    <main className="flex items-center justify-center min-h-screen bg-base-100">
-      <div className="card w-96 shadow-xl bg-base-200">
-        <div className="card-body">
-          <h2 className="text-center text-2xl font-bold text-primary">Login</h2>
-          <form onSubmit={handleLogin}>
-            <div className="form-control w-full">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                placeholder="Digite seu email"
-                className="input input-bordered w-full"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
+    <main className="flex flex-col items-center justify-center min-h-screen bg-base-100 p-4">
+      <div className="w-full max-w-md">
+        {/* Botão para voltar à tela inicial */}
+        <Link to="/" className="btn btn-ghost btn-sm gap-2 mb-6 self-start">
+          <ArrowLeft size={16} />
+          Voltar à página inicial
+        </Link>
+        
+        <div className="card w-full shadow-xl bg-base-200">
+          <div className="card-body">
+            <h2 className="text-center text-2xl font-bold text-primary">Login</h2>
+            <form onSubmit={handleLogin}>
+              <div className="form-control w-full">
+                <label className="label">
+                  <span className="label-text">Email</span>
+                </label>
+                <input
+                  type="email"
+                  placeholder="Digite seu email"
+                  className="input input-bordered w-full"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                />
+              </div>
+              <div className="form-control w-full mt-4">
+                <label className="label">
+                  <span className="label-text">Senha</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="Digite sua senha"
+                  className="input input-bordered w-full"
+                  value={senha}
+                  onChange={(e) => setSenha(e.target.value)}
+                />
+              </div>
+              {errorMessage && (
+                <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
+              )}
+              <button type="submit" className="btn btn-primary w-full mt-6">
+                Entrar
+              </button>
+            </form>
+            <div className="text-center mt-4">
+              <p className="text-sm">
+                Não tem uma conta?{" "}
+                <Link to="/cadastro" className="text-secondary">
+                  Cadastre-se
+                </Link>
+              </p>
             </div>
-            <div className="form-control w-full mt-4">
-              <label className="label">
-                <span className="label-text">Senha</span>
-              </label>
-              <input
-                type="password"
-                placeholder="Digite sua senha"
-                className="input input-bordered w-full"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-              />
-            </div>
-            {errorMessage && (
-              <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-            )}
-            <button type="submit" className="btn btn-primary w-full mt-6">
-              Entrar
-            </button>
-          </form>
-          <div className="text-center mt-4">
-            <p className="text-sm">
-              Não tem uma conta?{" "}
-              <a href="/cadastro" className="text-secondary">
-                Cadastre-se
-              </a>
-            </p>
           </div>
         </div>
       </div>

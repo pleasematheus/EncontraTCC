@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Edit2, Trash2 } from "lucide-react"
 import supabase from "@/utils/supabase"
 
@@ -58,13 +58,6 @@ const PostCards = ({
   const [quantidadeCandidaturas, setQuantidadeCandidaturas] =
     useState<number>(0)
 
-  // Verificar número de candidaturas ao montar o componente
-  useState(() => {
-    if (post.candidaturas_abertas) {
-      checkCandidaturasCount()
-    }
-  })
-
   // Verificar quantidade de candidaturas
   const checkCandidaturasCount = async () => {
     try {
@@ -80,6 +73,13 @@ const PostCards = ({
       console.error("Erro ao verificar candidaturas:", error)
     }
   }
+    
+  // Verificar número de candidaturas ao montar o componente
+  useEffect(() => {
+    if (post.candidaturas_abertas) {
+      checkCandidaturasCount()
+    }
+  }, [])
 
   const handleEdit = () => {
     setIsEditing(true)

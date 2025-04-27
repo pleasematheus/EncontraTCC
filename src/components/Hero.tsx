@@ -1,6 +1,7 @@
 import { useState } from "react"
 import { Dialog, DialogPanel } from "@headlessui/react"
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline"
+import { Link } from "react-router-dom"
 
 import LogoCocktail from "../assets/cocktail-logo.png"
 import Logo from "../assets/logo.png"
@@ -18,10 +19,10 @@ export default function Hero() {
           className="flex items-center justify-between p-6 lg:px-8"
         >
           <div className="flex lg:flex-1">
-            <a href="#" className="btn btn-link -m-1.5 p-1.5">
+            <Link to="/" className="btn btn-link -m-1.5 p-1.5">
               <span className="sr-only">EncontraTCC</span>
               <img alt="" src={LogoCocktail} className="h-8 w-auto" />
-            </a>
+            </Link>
           </div>
           <div className="flex lg:hidden">
             <button
@@ -33,13 +34,21 @@ export default function Hero() {
               <Bars3Icon aria-hidden="true" className="h-6 w-6" />
             </button>
           </div>
+          <div className="hidden lg:flex lg:gap-x-6">
+            <Link
+              to="/saiba-mais"
+              className="text-sm font-semibold leading-6"
+            >
+              Saiba mais
+            </Link>
+          </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a
-              href="/login"
+            <Link
+              to="/login"
               className="text-sm font-semibold leading-6"
             >
               Log in <span aria-hidden="true">&rarr;</span>
-            </a>
+            </Link>
           </div>
         </nav>
         <Dialog
@@ -50,10 +59,10 @@ export default function Hero() {
           <div className="fixed inset-0 z-50" />
           <DialogPanel className="fixed inset-y-0 right-0 z-50 w-full overflow-y-auto bg-base-100 px-6 py-6 sm:max-w-sm sm:ring-1 sm:ring-gray-900/10">
             <div className="flex items-center justify-between">
-              <a href="#" className="-m-1.5 p-1.5">
+              <Link to="/" className="-m-1.5 p-1.5">
                 <span className="sr-only">EncontraTCC</span>
                 <img alt="" src={LogoCocktail} className="h-8 w-auto" />
-              </a>
+              </Link>
               <button
                 type="button"
                 onClick={() => setMobileMenuOpen(false)}
@@ -65,13 +74,21 @@ export default function Hero() {
             </div>
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-gray-500/10">
+                <div className="space-y-2 py-6">
+                  <Link
+                    to="/saiba-mais"
+                    className="-mx-3 block rounded-lg px-3 py-2 text-base font-semibold leading-7 hover:bg-base-200"
+                  >
+                    Saiba mais
+                  </Link>
+                </div>
                 <div className="py-6">
-                  <a
-                    href="/login"
+                  <Link
+                    to="/login"
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base font-semibold leading-7 hover:bg-base-200"
                   >
                     Log in
-                  </a>
+                  </Link>
                 </div>
               </div>
             </div>
@@ -109,18 +126,18 @@ export default function Hero() {
               ideal, com demandas reais e oportunidades que vão te levar longe.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
-              <a
-                href="/cadastro"
+              <Link
+                to="/cadastro"
                 className="btn btn-secondary px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-[#3450F7] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#020932] active:bg-[#020932]"
               >
                 Cadastre-se
-              </a>
-              <a
-                href="#"
+              </Link>
+              <Link
+                to="/saiba-mais"
                 className="btn btn-ghost text-sm font-semibold leading-6"
               >
                 Saiba mais <span aria-hidden="true">→</span>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

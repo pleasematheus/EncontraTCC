@@ -12,6 +12,8 @@ import Community from "./Community"
 import CreatePost from "./CreatePost"
 import Candidaturas from "./Candidaturas"
 import CandidaturasDetalhes from "./CandidaturasDetalhes"
+import SearchResults from "./SearchResults"
+import SaibaMais from "./SaibaMais"
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,10 @@ const router = createBrowserRouter([
   {
     path: "/cadastro",
     element: <Cadastro />,
+  },
+  {
+    path: "/saiba-mais",
+    element: <SaibaMais />,
   },
   {
     path: "/dashboard",
@@ -80,6 +86,14 @@ const router = createBrowserRouter([
     element: (
       <ProtectedRoute>
         <CandidaturasDetalhes />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: "/pesquisa",
+    element: (
+      <ProtectedRoute>
+        <SearchResults />
       </ProtectedRoute>
     ),
   },
