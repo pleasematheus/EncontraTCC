@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react"
-import { useNavigate } from "react-router-dom"
 import supabase from "../utils/supabase"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
@@ -24,7 +23,6 @@ const TrendingPosts = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userType, setUserType] = useState<string | null>(null)
-  const navigate = useNavigate()
 
   // Obter tipo do usuário (Discente/Docente)
   const getUserType = async () => {
