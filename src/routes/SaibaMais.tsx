@@ -8,13 +8,11 @@ import {
   BookOpen,
   PenTool,
 } from "lucide-react"
-import Header from "@/components/Header"
 import Footer from "@/components/Footer"
 
 const SaibaMais = () => {
   return (
     <>
-      <Header />
       <main className="container mx-auto px-4 py-8 min-h-screen">
         <Link
           to="/"
