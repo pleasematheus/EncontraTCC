@@ -46,3 +46,17 @@ CREATE INDEX IF NOT EXISTS idx_trending_posts_tipo ON trending_posts_week (tipo)
 
 -- Índice para melhorar a performance de consultas por comunidade
 CREATE INDEX IF NOT EXISTS idx_trending_posts_comunidade ON trending_posts_week (comunidade_id);
+
+-- Comando para refresh da materialized view (atualizando os dados)
+-- Pode ser executado manualmente ou por um job programado
+COMMENT ON PROCEDURE refresh_trending_posts_week() IS 'Atualiza a materialized view de trending posts da semana';
+CREATE OR REPLACE PROCEDURE refresh_trending_posts_week()
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  REFRESH MATERIALIZED VIEW trending_posts_week;
+END;
+$$;
+
+-- Exemplo de como executar o refresh:
+-- CALL refresh_trending_posts_week();
