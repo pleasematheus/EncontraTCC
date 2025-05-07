@@ -20,22 +20,7 @@ WITH
 
 -- Permitir que os usuários atualizem seus próprios dados
 CREATE POLICY "Allow users to update their own profile" ON public."Usuarios" FOR
-UPDATE TO authenticated USING (
-  id_auth_users = (
-    select
-      auth.uid ()
-  )
-)
-WITH
-  CHECK (auth.uid () IS NOT NULL);
-
--- Permitir que os usuários deletem apenas seus próprios dados
-CREATE POLICY "Allow users to delete their own profile" ON public."Usuarios" FOR DELETE TO authenticated USING (
-  id_auth_users = (
-    select
-      auth.uid ()
-  )
-);
+UPDATE TO authenticated USING (id_auth_users = auth.uid ());
 
 /***Comunidades***/
 -- Permitir leitura pública dos dados

@@ -1,7 +1,7 @@
 {
   "name": "encontratcc",
   "private": true,
-  "version": "0.25.3",
+  "version": "0.25.4",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -10,7 +10,7 @@
     "preview": "vite preview",
     "tailwatch": "tailwindcss -i ./src/index.css -o ./src/output.css --watch",
     "tailpreview": "tailwindcss -i ./src/index.css -o ./src/output.css",
-    "tailbuild": "tailwindcss -i ./src/index.css -o ./src/output.css --minify",
+    "tailbuild": "tailwindcss -i ./src/index.css -o ./src/output.css --minify"
   },
   "dependencies": {
     "@headlessui/react": "^2.1.10",
