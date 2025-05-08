@@ -30,6 +30,23 @@ LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+  -- Validação do tamanho mínimo do nome (3 caracteres)
+  IF LENGTH(nome_input) < 3 THEN
+    RAISE EXCEPTION 'O nome deve ter no mínimo 3 caracteres.';
+  END IF;
+
+  -- Validação do email com regex
+  -- Verifica formato de email básico: algo@algo.algo
+  IF NOT email_input ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$' THEN
+    RAISE EXCEPTION 'O email deve ter um formato válido.';
+  END IF;
+
+  -- Validação do tipo de usuário
+  IF tipo_input NOT IN ('Discente', 'Docente') THEN
+    RAISE EXCEPTION 'O tipo de usuário deve ser Discente ou Docente.';
+  END IF;
+
+  -- Verificação se já existe usuário com o email
   IF EXISTS (
     SELECT 1 FROM public."Usuarios" WHERE email = email_input
   ) THEN

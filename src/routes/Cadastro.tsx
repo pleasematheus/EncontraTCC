@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
 import { ArrowLeft } from "lucide-react"
@@ -6,18 +6,152 @@ import supabase from "@/utils/supabase"
 
 type Role = "Discente" | "Docente"
 
+interface FieldError {
+  error: boolean
+  message: string
+}
+
+interface FormErrors {
+  nome: FieldError
+  email: FieldError
+  password: FieldError
+  confirmPassword: FieldError
+}
+
 const CadastroPage = () => {
   const {} = useTheme()
   const [nome, setNome] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [role, setRole] = useState<Role>("Discente")
   const [errorMessage, setErrorMessage] = useState("")
+  const [touched, setTouched] = useState({
+    nome: false,
+    email: false,
+    password: false,
+    confirmPassword: false,
+  })
+  const [errors, setErrors] = useState<FormErrors>({
+    nome: { error: false, message: "" },
+    email: { error: false, message: "" },
+    password: { error: false, message: "" },
+    confirmPassword: { error: false, message: "" },
+  })
   const navigate = useNavigate()
+
+  // Função para validar o formato do email usando regex
+  const isValidEmail = (email: string): boolean => {
+    const emailRegex = /^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/
+    return emailRegex.test(email)
+  }
+
+  // Função para validar o nome (mínimo 3 caracteres)
+  const isValidName = (name: string): boolean => {
+    return name.trim().length >= 3
+  }
+
+  // Validar formulário em tempo real quando os valores mudam
+  useEffect(() => {
+    validateForm()
+  }, [nome, email, password, confirmPassword])
+
+  // Função para validar o formulário inteiro
+  const validateForm = () => {
+    const newErrors = { ...errors }
+
+    // Validar nome
+    if (touched.nome) {
+      if (!nome.trim()) {
+        newErrors.nome = { error: true, message: "Nome é obrigatório" }
+      } else if (!isValidName(nome)) {
+        newErrors.nome = {
+          error: true,
+          message: "O nome deve ter no mínimo 3 caracteres",
+        }
+      } else {
+        newErrors.nome = { error: false, message: "" }
+      }
+    }
+
+    // Validar email
+    if (touched.email) {
+      if (!email.trim()) {
+        newErrors.email = { error: true, message: "Email é obrigatório" }
+      } else if (!isValidEmail(email)) {
+        newErrors.email = {
+          error: true,
+          message: "O email deve ter um formato válido",
+        }
+      } else {
+        newErrors.email = { error: false, message: "" }
+      }
+    }
+
+    // Validar senha
+    if (touched.password) {
+      if (!password) {
+        newErrors.password = { error: true, message: "Senha é obrigatória" }
+      } else if (password.length < 6) {
+        newErrors.password = {
+          error: true,
+          message: "A senha deve ter no mínimo 6 caracteres",
+        }
+      } else {
+        newErrors.password = { error: false, message: "" }
+      }
+    }
+
+    // Validar confirmação de senha
+    if (touched.confirmPassword) {
+      if (!confirmPassword) {
+        newErrors.confirmPassword = {
+          error: true,
+          message: "Confirme sua senha",
+        }
+      } else if (password !== confirmPassword) {
+        newErrors.confirmPassword = {
+          error: true,
+          message: "As senhas não coincidem",
+        }
+      } else {
+        newErrors.confirmPassword = { error: false, message: "" }
+      }
+    }
+
+    setErrors(newErrors)
+  }
+
+  // Função para marcar campo como tocado
+  const handleBlur = (field: keyof typeof touched) => {
+    setTouched({ ...touched, [field]: true })
+  }
 
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage("")
+
+    // Marcar todos os campos como tocados para exibir todos os erros
+    setTouched({
+      nome: true,
+      email: true,
+      password: true,
+      confirmPassword: true,
+    })
+
+    // Validar formulário antes de enviar
+    validateForm()
+
+    // Verificar se há erros no formulário
+    if (
+      errors.nome.error ||
+      errors.email.error ||
+      errors.password.error ||
+      errors.confirmPassword.error
+    ) {
+      setErrorMessage("Por favor, corrija os erros no formulário.")
+      return
+    }
 
     try {
       // 1. Cria o usuário no Supabase Auth
@@ -81,11 +215,21 @@ const CadastroPage = () => {
                 <input
                   type="text"
                   placeholder="Digite seu nome"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    touched.nome && errors.nome.error ? "input-error" : ""
+                  }`}
                   value={nome}
                   onChange={(e) => setNome(e.target.value)}
+                  onBlur={() => handleBlur("nome")}
                   required
                 />
+                {touched.nome && errors.nome.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.nome.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="form-control w-full mt-4">
                 <label className="label">
@@ -94,11 +238,21 @@ const CadastroPage = () => {
                 <input
                   type="email"
                   placeholder="Digite seu email"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    touched.email && errors.email.error ? "input-error" : ""
+                  }`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  onBlur={() => handleBlur("email")}
                   required
                 />
+                {touched.email && errors.email.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.email.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="form-control w-full mt-4">
                 <label className="label">
@@ -107,11 +261,48 @@ const CadastroPage = () => {
                 <input
                   type="password"
                   placeholder="Digite sua senha"
-                  className="input input-bordered w-full"
+                  className={`input input-bordered w-full ${
+                    touched.password && errors.password.error
+                      ? "input-error"
+                      : ""
+                  }`}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  onBlur={() => handleBlur("password")}
                   required
                 />
+                {touched.password && errors.password.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.password.message}
+                    </span>
+                  </label>
+                )}
+              </div>
+              <div className="form-control w-full mt-4">
+                <label className="label">
+                  <span className="label-text">Confirme sua Senha</span>
+                </label>
+                <input
+                  type="password"
+                  placeholder="Confirme sua senha"
+                  className={`input input-bordered w-full ${
+                    touched.confirmPassword && errors.confirmPassword.error
+                      ? "input-error"
+                      : ""
+                  }`}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  onBlur={() => handleBlur("confirmPassword")}
+                  required
+                />
+                {touched.confirmPassword && errors.confirmPassword.error && (
+                  <label className="label">
+                    <span className="label-text-alt text-error">
+                      {errors.confirmPassword.message}
+                    </span>
+                  </label>
+                )}
               </div>
               <div className="form-control w-full mt-4">
                 <label className="label">
