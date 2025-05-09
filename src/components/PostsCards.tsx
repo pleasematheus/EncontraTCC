@@ -72,7 +72,7 @@ const PostCards = ({
       const { data, error } = await supabase
         .from("Candidaturas")
         .select("usuario_id")
-        .eq("id_postagem", post.id)
+        .eq("postagem_id", post.id)
 
       if (error) throw error
 

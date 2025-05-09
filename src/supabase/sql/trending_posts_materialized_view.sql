@@ -12,16 +12,19 @@ SELECT
   p.id_usuario_criador,
   p.candidaturas_abertas,
   COUNT(c.id) AS candidaturas_count,
+  MAX(c.data_candidatura) AS ultima_candidatura,
   com.nome AS comunidade_nome,
   u.nome AS nome_criador
 FROM
   "Postagens" p
-  LEFT JOIN "Candidaturas" c ON p.id = c.postagem_id
-  LEFT JOIN "Comunidades" com ON p.comunidade_id = com.id
-  LEFT JOIN "Usuarios" u ON p.id_usuario_criador = u.id
+  LEFT JOIN "Candidaturas" c
+    ON p.id = c.postagem_id
+  LEFT JOIN "Comunidades" com
+    ON p.comunidade_id = com.id
+  LEFT JOIN "Usuarios" u
+    ON p.id_usuario_criador = u.id
 WHERE
   p.candidaturas_abertas = true
-  AND c.data_candidatura >= (CURRENT_DATE - INTERVAL '7 days')
 GROUP BY
   p.id,
   p.comunidade_id,
@@ -36,6 +39,7 @@ GROUP BY
   com.nome,
   u.nome
 ORDER BY
+  ultima_candidatura DESC,
   candidaturas_count DESC;
 
 -- Índice para melhorar a performance de consultas por número de candidaturas
