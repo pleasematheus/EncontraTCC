@@ -184,9 +184,10 @@ export default function CreatePost() {
                 onChange={(e) => setTipo(e.target.value)}
                 required
               >
-                <option value="Projeto">Projeto</option>
+                <option value="Projeto de Pesquisa">Projeto de Pesquisa</option>
+                <option value="Projeto de Extensão">Projeto de Extensão</option>
+                <option value="Projeto de Ensino">Projeto de Ensino</option>
                 <option value="TCC">TCC</option>
-                <option value="Pesquisa">Pesquisa</option>
                 <option value="Monitoria">Monitoria</option>
                 <option value="Outro">Outro</option>
               </select>
