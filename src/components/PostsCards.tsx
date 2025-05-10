@@ -168,18 +168,17 @@ const PostCards = ({
     setIsLoading(true)
     setErrorMessage("")
 
-    try {
-      // Verificar se usuário está autenticado
+    try {      // Verificar se usuário está autenticado
       const {
         data: { user },
       } = await supabase.auth.getUser()
-
+      
       if (!user) {
         setErrorMessage("Usuário não autenticado")
         setIsLoading(false)
         return
       }
-
+      
       // Excluir post no Supabase
       const { error } = await supabase
         .from("Postagens")
@@ -188,7 +187,7 @@ const PostCards = ({
 
       if (error) throw error
 
-      // Notificar componente pai sobre a exclusão
+      // Notificar componente pai sobre a exclusão para atualizar a contagem
       if (onPostUpdate) {
         onPostUpdate()
       }

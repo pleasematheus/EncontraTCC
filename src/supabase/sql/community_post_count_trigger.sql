@@ -1,16 +1,15 @@
 -- Trigger para incrementar a quantidade de posts dentro de uma comunidade
 -- quando uma nova postagem é criada
 
--- Primeiro, adicionamos uma coluna para a contagem de posts na tabela de Comunidades
--- se ainda não existir
+-- Primeiro, verificamos se a coluna total_posts existe
 DO $$
 BEGIN
     IF NOT EXISTS (
         SELECT 1 
         FROM information_schema.columns 
-        WHERE table_name = 'Comunidades' AND column_name = 'quantidade_posts'
+        WHERE table_name = 'Comunidades' AND column_name = 'total_posts'
     ) THEN
-        ALTER TABLE "Comunidades" ADD COLUMN quantidade_posts integer DEFAULT 0;
+        ALTER TABLE "Comunidades" ADD COLUMN total_posts integer DEFAULT 0;
     END IF;
 END
 $$;
@@ -23,7 +22,7 @@ AS $$
 BEGIN
     -- Incrementa a contagem de posts na comunidade correspondente
     UPDATE "Comunidades"
-    SET quantidade_posts = quantidade_posts + 1
+    SET total_posts = total_posts + 1
     WHERE id = NEW.comunidade_id;
     
     RETURN NEW;
@@ -45,7 +44,7 @@ AS $$
 BEGIN
     -- Decrementa a contagem de posts na comunidade correspondente
     UPDATE "Comunidades"
-    SET quantidade_posts = quantidade_posts - 1
+    SET total_posts = GREATEST(total_posts - 1, 0)
     WHERE id = OLD.comunidade_id;
     
     RETURN OLD;

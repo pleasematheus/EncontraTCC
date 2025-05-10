@@ -149,10 +149,23 @@ export default function Communities() {
     )
     setLoading(false)
   }
-
   // Carrega as comunidades quando o componente é montado ou userId muda
   useEffect(() => {
     getComunidades()
+
+    // Configurar evento para atualizar quando a página se tornar visível novamente
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        getComunidades()
+      }
+    }
+
+    document.addEventListener("visibilitychange", handleVisibilityChange)
+
+    // Limpar o event listener quando o componente for desmontado
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+    }
   }, [userId])
 
   // Função para criar comunidade, validando o tipo e inserindo os dados corretos.

@@ -23,6 +23,7 @@ interface Community {
   id: string
   nome: string
   total_usuarios: number
+  total_posts: number
 }
 
 interface UserInfo {
@@ -84,14 +85,14 @@ export default function CommunityPage() {
     }
 
     getUserInfo()
-  }, [])
+  }, [])  
 
   // Consulta para buscar os dados da comunidade pelo discriminador
   useEffect(() => {
     async function fetchCommunity() {
       const { data, error } = await supabase
         .from("Comunidades")
-        .select("id, nome, total_usuarios")
+        .select("id, nome, total_usuarios, total_posts")
         .eq("discriminador", discriminador)
         .single()
 
@@ -152,11 +153,23 @@ export default function CommunityPage() {
   // Consulta para buscar os posts da comunidade pelo ID da comunidade
   useEffect(() => {
     fetchPosts()
-  }, [community])
-
-  // Função para atualizar a lista de posts após uma edição
+  }, [community])  // Função para atualizar a lista de posts após uma edição ou deleção
   const handlePostUpdate = () => {
     fetchPosts()
+    
+    // Atualizar a contagem de posts na comunidade após a exclusão
+    // Usamos o setState diretamente para refletir a mudança em tempo real
+    if (community) {
+      setCommunity(prevCommunity => {
+        if (!prevCommunity) return null;
+        
+        // Ao excluir um post, decrementamos o contador
+        return {
+          ...prevCommunity,
+          total_posts: Math.max(prevCommunity.total_posts - 1, 0)
+        };
+      });
+    }
   }
 
   // Função para verificar se o usuário pode editar um post
@@ -276,14 +289,10 @@ export default function CommunityPage() {
                 )}
               </button>
             )}
-          </div>
-
-          {community && (
+          </div>          {community && (
             <div className="mb-6 text-sm text-gray-600">
               <p>Total de membros: {community.total_usuarios}</p>
-              {allPosts.length > 0 && (
-                <p className="mt-1">Total de postagens: {allPosts.length}</p>
-              )}
+              <p className="mt-1">Total de postagens: {community.total_posts}</p>
             </div>
           )}
 

@@ -86,9 +86,7 @@ export default function CreatePost() {
       if (userError || !userData) {
         setErrorMessage("Erro ao obter dados do usuário")
         return
-      }
-
-      // Criar nova postagem
+      } // Criar nova postagem
       const { error } = await supabase
         .from("Postagens")
         .insert([
@@ -110,6 +108,8 @@ export default function CreatePost() {
         console.error("Erro ao criar postagem:", error)
         setErrorMessage(`Erro ao criar postagem: ${error.message}`)
       } else {
+        // A trigger no banco de dados já incrementará o contador de posts automaticamente
+
         setSuccessMessage("Postagem criada com sucesso!")
         setTimeout(() => {
           navigate(`/c/${discriminador}`)

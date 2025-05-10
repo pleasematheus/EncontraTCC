@@ -102,7 +102,7 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
           [communityId]: true,
         }))
 
-        // Atualizar contagem local de usuários
+        // Atualizar contagem local de usuários em tempo real
         setLocalCommunities((prev) =>
           prev.map((community) =>
             community.id === communityId
