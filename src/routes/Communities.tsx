@@ -273,9 +273,7 @@ export default function Communities() {
         relacaoError
       )
       // Se falhar ao registrar a relação, ainda podemos prosseguir, mas logamos o erro
-    }
-
-    // Limpa os campos e fecha o modal.
+    } // Limpa os campos e fecha o modal.
     setNome("")
     setDescricao("")
     setDiscriminador("")
@@ -284,6 +282,9 @@ export default function Communities() {
     await getComunidades()
     // Volta para a primeira página após criar uma nova comunidade
     setCurrentPage(1)
+
+    // Redirecionar para a página da comunidade recém-criada
+    window.location.href = `/c/${discriminador}`
 
     setSubmitting(false)
   }

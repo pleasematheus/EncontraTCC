@@ -6,7 +6,7 @@ import Pagination from "@/components/Pagination"
 import supabase from "@/utils/supabase"
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { PlusCircle, UserPlus, UserMinus } from "lucide-react"
+import { PlusCircle, UserPlus, UserMinus, Pencil, Trash2 } from "lucide-react"
 
 interface Post {
   id: string
@@ -22,9 +22,11 @@ interface Post {
 interface Community {
   id: string
   nome: string
+  descricao?: string
   total_usuarios: number
   total_posts: number
   id_usuario_criador: string
+  discriminador?: string
 }
 
 interface UserInfo {
@@ -44,10 +46,18 @@ export default function CommunityPage() {
   const [community, setCommunity] = useState<Community | null>(null)
   const [userInfo, setUserInfo] = useState<UserInfo>({ id: null, tipo: null })
   const [isFollowing, setIsFollowing] = useState(false)
+  const [isCreator, setIsCreator] = useState(false)
   const [followLoading, setFollowLoading] = useState(false)
   const [loading, setLoading] = useState(true)
   const navigate = useNavigate()
 
+  // Estados para edição/exclusão de comunidade
+  const [editModalOpen, setEditModalOpen] = useState(false)
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false)
+  const [editNome, setEditNome] = useState("")
+  const [editDescricao, setEditDescricao] = useState("")
+  const [editDiscriminador, setEditDiscriminador] = useState("")
+  const [submitting, setSubmitting] = useState(false)
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
     setCurrentPage(page)
@@ -86,13 +96,14 @@ export default function CommunityPage() {
     }
 
     getUserInfo()
-  }, [])
-  // Consulta para buscar os dados da comunidade pelo discriminador
+  }, []) // Consulta para buscar os dados da comunidade pelo discriminador
   useEffect(() => {
     async function fetchCommunity() {
       const { data, error } = await supabase
         .from("Comunidades")
-        .select("id, nome, total_usuarios, total_posts, id_usuario_criador")
+        .select(
+          "id, nome, descricao, total_usuarios, total_posts, id_usuario_criador, discriminador"
+        )
         .eq("discriminador", discriminador)
         .single()
 
@@ -102,31 +113,67 @@ export default function CommunityPage() {
         setCommunity(data)
       }
     }
-
     fetchCommunity()
   }, [discriminador])
 
-  // Verificar se o usuário já segue a comunidade
+  // Verificar se o usuário já segue a comunidade e se é o criador
   useEffect(() => {
-    async function checkFollowStatus() {
+    async function checkFollowAndCreatorStatus() {
       if (!userInfo.id || !community?.id) return
 
+      // Primeiro verificar se o usuário é o criador pelo campo id_usuario_criador
+      const isCreatorById = community.id_usuario_criador === userInfo.id
+
+      // Se já é criador pelo ID, definir os estados imediatamente
+      if (isCreatorById) {
+        setIsCreator(true)
+        setIsFollowing(true) // Criador sempre segue a comunidade
+
+        // Garantir que o relacionamento exista no banco
+        const { data: existingRelation, error: checkError } = await supabase
+          .from("usuario_comunidade")
+          .select("id")
+          .eq("id_usuario", userInfo.id)
+          .eq("id_comunidade", community.id)
+          .eq("tipo", "criador")
+          .single()
+
+        if (checkError || !existingRelation) {
+          // Se não existir uma relação de criador, criamos uma
+          await supabase.from("usuario_comunidade").insert([
+            {
+              id_comunidade: community.id,
+              id_usuario: userInfo.id,
+              tipo: "criador",
+            },
+          ])
+        }
+
+        return // Não precisamos verificar a relação na tabela novamente
+      }
+
+      // Verificar se o usuário já é criador ou seguidor da comunidade na tabela de relações
       const { data, error } = await supabase
         .from("usuario_comunidade")
-        .select("id")
+        .select("id, tipo")
         .eq("id_usuario", userInfo.id)
         .eq("id_comunidade", community.id)
-        .eq("tipo", "seguidor") // Alterado de "role" para "tipo"
-        .maybeSingle()
+        .in("tipo", ["seguidor", "criador"])
 
       if (error) {
         console.error("Erro ao verificar status de seguidor:", error)
       } else {
-        setIsFollowing(!!data)
+        // Se houver qualquer relação, o usuário está seguindo
+        setIsFollowing(data && data.length > 0)
+
+        // Verifica se o usuário é o criador da comunidade pela relação tipo "criador"
+        const isCreatorByRelation =
+          data?.some((item) => item.tipo === "criador") || false
+        setIsCreator(isCreatorByRelation || isCreatorById)
       }
     }
 
-    checkFollowStatus()
+    checkFollowAndCreatorStatus()
   }, [userInfo.id, community?.id])
 
   // Função para buscar os posts da comunidade
@@ -181,6 +228,149 @@ export default function CommunityPage() {
       isFollowing
     )
   }
+
+  // Função para abrir o modal de edição de comunidade
+  const openEditModal = () => {
+    if (community) {
+      setEditNome(community.nome)
+      // Verificar se a descrição existe no objeto da comunidade antes de definir
+      // Se community.descricao for undefined, usar string vazia como fallback
+      setEditDescricao(community.descricao || "")
+      setEditDiscriminador(discriminador || "")
+      setEditModalOpen(true)
+    }
+  }
+  // Função para salvar as alterações da comunidade
+  const handleSaveCommunity = async () => {
+    if (!community || !userInfo.id) return
+
+    // Verificar se o usuário é o criador da comunidade
+    if (community.id_usuario_criador !== userInfo.id) {
+      alert("Apenas o criador da comunidade pode editá-la.")
+      setEditModalOpen(false)
+      return
+    }
+
+    setSubmitting(true)
+
+    try {
+      // Validar tamanho do discriminador (mínimo 3 caracteres)
+      if (editDiscriminador.length < 3) {
+        alert("O discriminador deve ter pelo menos 3 caracteres.")
+        return
+      }
+
+      // Verificar se o discriminador já existe (se for diferente do atual)
+      if (editDiscriminador !== discriminador) {
+        const { data: existingCommunity, error: checkError } = await supabase
+          .from("Comunidades")
+          .select("id")
+          .eq("discriminador", editDiscriminador)
+          .single()
+
+        if (!checkError && existingCommunity) {
+          alert("Este discriminador já está em uso. Por favor, escolha outro.")
+          return
+        }
+      }
+
+      // Atualizar a comunidade
+      const { error } = await supabase
+        .from("Comunidades")
+        .update({
+          nome: editNome,
+          descricao: editDescricao,
+          discriminador: editDiscriminador,
+          data_atualizacao: new Date().toISOString(),
+        })
+        .eq("id", community.id)
+
+      if (error) {
+        console.error("Erro ao atualizar comunidade:", error)
+        alert("Erro ao atualizar comunidade: " + error.message)
+        return
+      }
+
+      // Fechar o modal e atualizar os dados
+      setEditModalOpen(false)
+      // Se o discriminador mudou, redirecionar para a nova URL
+      if (editDiscriminador !== discriminador) {
+        navigate(`/c/${editDiscriminador}`)
+      } else {
+        // Atualizar os dados da comunidade no estado
+        setCommunity({
+          ...community,
+          nome: editNome,
+          descricao: editDescricao,
+          discriminador: editDiscriminador,
+        })
+      }
+
+      alert("Comunidade atualizada com sucesso!")
+    } catch (error) {
+      console.error("Erro ao salvar comunidade:", error)
+    } finally {
+      setSubmitting(false)
+    }
+  }
+  // Função para excluir a comunidade
+  const handleDeleteCommunity = async () => {
+    if (!community || !userInfo.id) return
+
+    // Verificar se o usuário é o criador da comunidade
+    if (community.id_usuario_criador !== userInfo.id) {
+      alert("Apenas o criador da comunidade pode excluí-la.")
+      setDeleteModalOpen(false)
+      return
+    }
+
+    // Pedir confirmação adicional
+    const confirmText = window.prompt(
+      "Para confirmar a exclusão, digite 'EXCLUIR':"
+    )
+    if (confirmText !== "EXCLUIR") {
+      alert("Exclusão cancelada.")
+      setDeleteModalOpen(false)
+      return
+    }
+    setSubmitting(true)
+
+    try {
+      // Excluir as relações de usuário-comunidade
+      const { error: relacaoError } = await supabase
+        .from("usuario_comunidade")
+        .delete()
+        .eq("id_comunidade", community.id)
+
+      if (relacaoError) {
+        console.error("Erro ao excluir relações da comunidade:", relacaoError)
+        alert("Erro ao excluir a comunidade")
+        return
+      }
+
+      // Excluir a comunidade
+      const { error } = await supabase
+        .from("Comunidades")
+        .delete()
+        .eq("id", community.id)
+
+      if (error) {
+        console.error("Erro ao excluir comunidade:", error)
+        alert("Erro ao excluir a comunidade: " + error.message)
+        return
+      }
+
+      // Redirecionar para a página de comunidades
+      alert("Comunidade excluída com sucesso!")
+      navigate("/comunidades")
+    } catch (error) {
+      console.error("Erro ao excluir comunidade:", error)
+    } finally {
+      setSubmitting(false)
+      setDeleteModalOpen(false)
+    }
+  }
+
   // Função para seguir/deixar de seguir a comunidade
   const handleFollowToggle = async () => {
     if (!userInfo.id || !community?.id) return
@@ -189,7 +379,7 @@ export default function CommunityPage() {
     try {
       if (isFollowing) {
         // Verificar se o usuário é o criador da comunidade
-        if (community.id_usuario_criador === userInfo.id) {
+        if (isCreator) {
           alert(
             "Você não pode deixar de seguir uma comunidade que você criou. Para removê-la, você deve excluir a comunidade."
           )
@@ -271,56 +461,84 @@ export default function CommunityPage() {
       <Header />
       <div className="min-h-screen bg-base-100 py-8">
         <div className="max-w-screen-lg mx-auto px-4">
+          {" "}
           <div className="flex justify-between items-center mb-6">
-            <h1 className="text-3xl font-bold">
-              {community ? community.nome : "Carregando..."}
-            </h1>{" "}
-            {userInfo.id && community && !loading && (
-              <button
-                onClick={handleFollowToggle}
-                disabled={
-                  followLoading ||
-                  (community.id_usuario_criador === userInfo.id && isFollowing)
-                }
-                className={`btn ${
-                  isFollowing
-                    ? community.id_usuario_criador === userInfo.id
-                      ? "btn-primary cursor-not-allowed opacity-70"
-                      : "btn-primary"
-                    : "btn-outline btn-primary"
-                } flex items-center gap-2`}
-                title={
-                  community.id_usuario_criador === userInfo.id && isFollowing
-                    ? "Você não pode deixar de seguir uma comunidade que você criou"
-                    : ""
-                }
-              >
-                {followLoading ? (
-                  <>
-                    <span className="loading loading-spinner loading-sm mr-1"></span>
-                    {isFollowing ? "Seguindo" : "Seguir"}
-                  </>
-                ) : isFollowing ? (
-                  <>
-                    <UserMinus size={18} />{" "}
-                    {community.id_usuario_criador === userInfo.id
-                      ? "Criador"
-                      : "Seguindo"}
-                  </>
-                ) : (
-                  <>
-                    <UserPlus size={18} /> Seguir
-                  </>
-                )}
-              </button>
-            )}
+            <div>
+              <h1 className="text-3xl font-bold">
+                {community ? community.nome : "Carregando..."}
+              </h1>
+              {isCreator && (
+                <div className="badge badge-primary mt-2">
+                  Você é o criador desta comunidade
+                </div>
+              )}
+            </div>
+            <div className="flex gap-2">
+              {isCreator && community && (
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setEditModalOpen(true)}
+                    className="btn btn-outline btn-info flex items-center gap-2"
+                    title="Editar comunidade"
+                  >
+                    <Pencil size={16} /> Editar
+                  </button>
+                  <button
+                    onClick={() => setDeleteModalOpen(true)}
+                    className="btn btn-outline btn-error flex items-center gap-2"
+                    title="Excluir comunidade"
+                  >
+                    <Trash2 size={16} /> Excluir
+                  </button>
+                </div>
+              )}
+              {userInfo.id && community && !loading && (
+                <button
+                  onClick={handleFollowToggle}
+                  disabled={followLoading || (isCreator && isFollowing)}
+                  className={`btn ${
+                    isFollowing
+                      ? isCreator
+                        ? "btn-primary cursor-not-allowed opacity-70"
+                        : "btn-primary"
+                      : "btn-outline btn-primary"
+                  } flex items-center gap-2`}
+                  title={
+                    isCreator && isFollowing
+                      ? "Você não pode deixar de seguir uma comunidade que você criou"
+                      : ""
+                  }
+                >
+                  {followLoading ? (
+                    <>
+                      <span className="loading loading-spinner loading-sm mr-1"></span>
+                      {isFollowing ? "Seguindo" : "Seguir"}
+                    </>
+                  ) : isFollowing ? (
+                    <>
+                      <UserMinus size={18} />{" "}
+                      {isCreator ? "Criador" : "Seguindo"}
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus size={18} /> Seguir
+                    </>
+                  )}
+                </button>
+              )}
+            </div>
           </div>{" "}
           {community && (
-            <div className="mb-6 text-sm text-gray-600">
-              <p>Total de membros: {community.total_usuarios}</p>
-              <p className="mt-1">
-                Total de postagens: {community.total_posts}
-              </p>
+            <div className="mb-6">
+              {community.descricao && (
+                <p className="text-gray-600 mb-3">{community.descricao}</p>
+              )}
+              <div className="text-sm text-gray-600">
+                <p>Total de membros: {community.total_usuarios}</p>
+                <p className="mt-1">
+                  Total de postagens: {community.total_posts}
+                </p>
+              </div>
             </div>
           )}
           <div className="grid grid-cols-1 gap-4 mb-6">
@@ -352,7 +570,6 @@ export default function CommunityPage() {
           )}
         </div>
       </div>
-
       {/* Botão fixo para criar postagem (aparece somente para docentes que seguem a comunidade) */}
       {!loading && userInfo.tipo === "Docente" && isFollowing && (
         <div className="fixed bottom-6 right-6 z-50">
@@ -364,9 +581,126 @@ export default function CommunityPage() {
             Criar Postagem
           </button>
         </div>
-      )}
-
+      )}{" "}
       <Footer />
+      {/* Modal de Edição de Comunidade */}
+      {editModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h2 className="text-2xl font-bold mb-4">Editar Comunidade</h2>
+            <div className="form-control mb-3">
+              <label className="label">
+                <span className="label-text">Nome da Comunidade</span>
+              </label>
+              <input
+                type="text"
+                className="input input-bordered"
+                value={editNome}
+                onChange={(e) => setEditNome(e.target.value)}
+                placeholder="Nome da Comunidade"
+                required
+              />
+            </div>
+            <div className="form-control mb-3">
+              <label className="label">
+                <span className="label-text">Descrição</span>
+              </label>
+              <textarea
+                className="textarea textarea-bordered"
+                value={editDescricao}
+                onChange={(e) => setEditDescricao(e.target.value)}
+                placeholder="Descrição da Comunidade"
+                rows={3}
+              />
+            </div>
+            <div className="form-control mb-5">
+              <label className="label">
+                <span className="label-text">Discriminador (URL)</span>
+              </label>
+              <input
+                type="text"
+                className="input input-bordered"
+                value={editDiscriminador}
+                onChange={(e) =>
+                  setEditDiscriminador(
+                    e.target.value.toLowerCase().replace(/\s+/g, "-")
+                  )
+                }
+                placeholder="discriminador-da-comunidade"
+                required
+              />
+              <label className="label">
+                <span className="label-text-alt">
+                  URL ficará: /c/{editDiscriminador}
+                </span>
+              </label>
+            </div>
+            <div className="flex justify-end gap-2">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setEditModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-primary"
+                onClick={handleSaveCommunity}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Salvar"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Modal de Exclusão de Comunidade */}
+      {deleteModalOpen && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
+          <div className="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
+            {" "}
+            <h2 className="text-2xl font-bold mb-4">Excluir Comunidade</h2>
+            <p className="mb-6">
+              Tem certeza que deseja excluir a comunidade{" "}
+              <strong>{community?.nome}</strong>?
+              <br />
+              <br />
+              <strong>Atenção:</strong> Esta ação é permanente e não pode ser
+              desfeita.
+              <br />
+              <br />
+              <strong>Importante:</strong> A exclusão da comunidade também
+              removerá todas as suas postagens e relacionamentos.
+              <br />
+              <br />
+              Para confirmar a exclusão, você precisará digitar EXCLUIR no
+              prompt que aparecerá.
+            </p>
+            <div className="flex justify-end gap-2">
+              <button
+                className="btn btn-ghost"
+                onClick={() => setDeleteModalOpen(false)}
+              >
+                Cancelar
+              </button>
+              <button
+                className="btn btn-error"
+                onClick={handleDeleteCommunity}
+                disabled={submitting}
+              >
+                {submitting ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  "Excluir"
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   )
 }

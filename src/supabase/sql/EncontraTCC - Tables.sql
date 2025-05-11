@@ -103,12 +103,12 @@ ALTER TABLE "usuario_comunidade" ADD FOREIGN KEY ("id_usuario") REFERENCES "Usua
 
 ALTER TABLE "Candidaturas" ADD FOREIGN KEY ("usuario_id") REFERENCES "Usuarios" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-ALTER TABLE "Candidaturas" ADD FOREIGN KEY ("postagem_id") REFERENCES "Postagens" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "Candidaturas" ADD FOREIGN KEY ("postagem_id") REFERENCES "Postagens" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;
 
 ALTER TABLE "Postagens" ADD FOREIGN KEY ("comunidade_id") REFERENCES "Comunidades" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;
 
 ALTER TABLE "Postagens" ADD FOREIGN KEY ("id_usuario_criador") REFERENCES "Usuarios" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
 
-ALTER TABLE "usuario_comunidade" ADD FOREIGN KEY ("id_comunidade") REFERENCES "Comunidades" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "usuario_comunidade" ADD FOREIGN KEY ("id_comunidade") REFERENCES "Comunidades" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;
 
-ALTER TABLE "Comunidades" ADD FOREIGN KEY ("id_usuario_criador") REFERENCES "Usuarios" ("id") ON UPDATE NO ACTION ON DELETE NO ACTION;
+ALTER TABLE "Comunidades" ADD FOREIGN KEY ("id_usuario_criador") REFERENCES "Usuarios" ("id") ON UPDATE NO ACTION ON DELETE CASCADE;

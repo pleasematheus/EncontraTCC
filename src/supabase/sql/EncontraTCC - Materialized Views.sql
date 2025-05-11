@@ -126,7 +126,7 @@ SELECT
 -- =============================================================================
 
 -- 7) Dropa versões antigas da função, se existirem
-DROP FUNCTION IF EXISTS public.get_trending_posts(uuid, text, integer, integer);
+-- DROP FUNCTION IF EXISTS public.get_trending_posts(uuid, text, integer, integer);
 
 -- 8) RPC "getter" com filtros e paginação, referenciando explicitamente private.mv_trending_posts_week
 CREATE OR REPLACE FUNCTION public.get_trending_posts(
