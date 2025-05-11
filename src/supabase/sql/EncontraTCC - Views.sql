@@ -1,7 +1,19 @@
+-- =============================================================================
+-- ORDEM DE EXECUÇÃO: 3
+-- VIEWS DO SISTEMA ENCONTRATCC
+-- =============================================================================
+-- Dependências: 
+--   EncontraTCC - Tables.sql
+--   EncontraTCC - Procedures & Triggers.sql
+-- Arquivo responsável por criar todas as views do sistema
+-- =============================================================================
+-- SEÇÃO 1: VIEWS PARA CONSULTAS DE POSTAGENS
+-- =============================================================================
 -- View para consultar as postagens mais recentes com informações das comunidades e criadores
 CREATE
 OR REPLACE VIEW "PostagensRecentes"
-WITH (security_invoker = on) AS
+WITH
+  (security_invoker = on) AS
 SELECT
   p."id",
   p."titulo",
@@ -30,7 +42,8 @@ ORDER BY
 -- View para consultar as postagens das comunidades que o usuário segue
 CREATE
 OR REPLACE VIEW "PostagensSeguidas"
-WITH (security_invoker = on) AS
+WITH
+  (security_invoker = on) AS
 SELECT
   p."id",
   p."titulo",

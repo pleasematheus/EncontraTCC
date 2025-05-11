@@ -1,3 +1,9 @@
+-- =============================================================================
+-- ORDEM DE EXECUÇÃO: 1
+-- SCHEMA E TABELAS DO SISTEMA ENCONTRATCC
+-- =============================================================================
+-- Dependências: Nenhuma
+-- Arquivo responsável por criar todas as tabelas do sistema
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 CREATE TABLE
@@ -52,7 +58,7 @@ CREATE TABLE
     "descricao_vector" TSVECTOR,
     "tipo" VARCHAR(255) NOT NULL,
     "prazo" TIMESTAMP,
-    "candidaturas" BIGINT NOT NULL,
+    "candidaturas" BIGINT NOT NULL DEFAULT 0,
     "candidaturas_abertas" BOOLEAN NOT NULL DEFAULT FALSE,
     "status" VARCHAR(20) NOT NULL,
     "data_criacao" TIMESTAMP NOT NULL DEFAULT NOW (),

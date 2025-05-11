@@ -1,6 +1,15 @@
--- filepath: e:\SSD_3\Backup\Outros\Projetos\EncontraTCC\src\supabase\sql\EncontraTCC - Materialized Views.sql
 -- =============================================================================
+-- ORDEM DE EXECUÇÃO: 4
 -- MATERIALIZED VIEWS DO SISTEMA ENCONTRATCC
+-- =============================================================================
+-- Dependências: 
+--   EncontraTCC - Tables.sql
+--   EncontraTCC - Procedures & Triggers.sql
+--   EncontraTCC - Views.sql
+-- Arquivo responsável por criar todas as materialized views e procedures associadas
+
+-- =============================================================================
+-- SEÇÃO 1: CONFIGURAÇÃO E CRIAÇÃO DE MATERIALIZED VIEWS
 -- =============================================================================
 
 -- 0) Remover versões antigas das views (se existirem)
@@ -9,7 +18,6 @@ DROP MATERIALIZED VIEW IF EXISTS private.trending_posts_week;
 
 -- 1) Criar schema privado para materialized views
 CREATE SCHEMA IF NOT EXISTS private;
-
 
 -- 2) Criar a materialized view dentro do schema private
 CREATE MATERIALIZED VIEW IF NOT EXISTS private.mv_trending_posts_week AS
@@ -73,6 +81,16 @@ CREATE INDEX IF NOT EXISTS idx_mv_trending_posts_comunidade
 
 -- 4) Habilitar extensão pg_cron
 CREATE EXTENSION IF NOT EXISTS pg_cron;
+
+-- Verificar se a extensão foi criada com sucesso
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_extension WHERE extname = 'pg_cron'
+  ) THEN
+    RAISE EXCEPTION 'A extensão pg_cron não foi instalada corretamente. Verifique se seu banco de dados possui os privilégios necessários.';
+  END IF;
+END $$;
 
 
 -- 5) Procedure para dar REFRESH na materialized view

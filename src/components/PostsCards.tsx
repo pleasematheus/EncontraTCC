@@ -13,7 +13,7 @@ interface Post {
   data_atualizacao?: string
   id_usuario_criador?: string
   candidaturas_abertas?: boolean
-  candidatos_unicos?: number
+  candidaturas?: number
 }
 
 interface CandidaturaData {
@@ -57,14 +57,14 @@ const PostCards = ({
     motivo: "",
   })
   const [quantidadeUsuariosCandidatos, setQuantidadeUsuariosCandidatos] =
-    useState<number>(post.candidatos_unicos || 0)
+    useState<number>(post.candidaturas || 0)
 
   // Verificar quantidade de candidaturas únicas (usuários distintos)
   const checkUniqueApplicantsCount = async () => {
     try {
-      if (post.candidatos_unicos !== undefined) {
+      if (post.candidaturas !== undefined) {
         // Se já temos o valor do banco através do post, use-o
-        setQuantidadeUsuariosCandidatos(post.candidatos_unicos)
+        setQuantidadeUsuariosCandidatos(post.candidaturas)
         return
       }
 

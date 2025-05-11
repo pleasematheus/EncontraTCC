@@ -32,7 +32,7 @@ const TrendingPosts = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [postsPerPage] = useState(9) // Posts por página
   const [selectedType, setSelectedType] = useState<string | null>(null)
-  
+
   // Obter tipo do usuário (Discente/Docente)
   const getUserType = async () => {
     try {
@@ -67,12 +67,11 @@ const TrendingPosts = () => {
         const offset = (currentPage - 1) * postsPerPage
 
         // Buscar posts usando a função getter
-        const { data, error } = await supabase
-          .rpc('get_trending_posts', {
-            p_tipo: selectedType,
-            p_limit: postsPerPage,
-            p_offset: offset
-          })
+        const { data, error } = await supabase.rpc("get_trending_posts", {
+          p_tipo: selectedType,
+          p_limit: postsPerPage,
+          p_offset: offset,
+        })
 
         if (error) throw error
 
@@ -108,27 +107,29 @@ const TrendingPosts = () => {
         {/* Filtro por tipo de post */}
         <div className="flex justify-center mb-6">
           <div className="btn-group">
-            <button 
-              className={`btn ${selectedType === null ? 'btn-active' : ''}`}
+            <button
+              className={`btn ${selectedType === null ? "btn-active" : ""}`}
               onClick={() => setSelectedType(null)}
             >
               Todos
             </button>
-            <button 
-              className={`btn ${selectedType === 'TCC' ? 'btn-active' : ''}`}
-              onClick={() => setSelectedType('TCC')}
+            <button
+              className={`btn ${selectedType === "TCC" ? "btn-active" : ""}`}
+              onClick={() => setSelectedType("TCC")}
             >
               TCCs
             </button>
-            <button 
-              className={`btn ${selectedType === 'Projeto' ? 'btn-active' : ''}`}
-              onClick={() => setSelectedType('Projeto')}
+            <button
+              className={`btn ${
+                selectedType === "Projeto" ? "btn-active" : ""
+              }`}
+              onClick={() => setSelectedType("Projeto")}
             >
               Projetos
             </button>
-            <button 
-              className={`btn ${selectedType === 'IC' ? 'btn-active' : ''}`}
-              onClick={() => setSelectedType('IC')}
+            <button
+              className={`btn ${selectedType === "IC" ? "btn-active" : ""}`}
+              onClick={() => setSelectedType("IC")}
             >
               IC
             </button>
@@ -147,7 +148,7 @@ const TrendingPosts = () => {
           <div className="text-center my-12">
             <p className="text-xl">Nenhuma postagem em alta esta semana</p>
             {selectedType && (
-              <button 
+              <button
                 className="btn btn-primary mt-4"
                 onClick={() => setSelectedType(null)}
               >
@@ -184,7 +185,7 @@ const TrendingPosts = () => {
                 </div>
               ))}
             </div>
-            
+
             {/* Paginação */}
             {totalCount > postsPerPage && (
               <div className="flex justify-center mt-8">

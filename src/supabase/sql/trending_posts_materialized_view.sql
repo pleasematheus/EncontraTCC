@@ -1,4 +1,0 @@
--- NOTA: Este arquivo foi descontinuado.
--- O conteúdo foi movido para "EncontraTCC - Materialized Views.sql" para melhor organização.
--- Por favor, use o arquivo "EncontraTCC - Materialized Views.sql" para todas as atualizações futuras.
--- Data da migração: 11 de maio de 2025
