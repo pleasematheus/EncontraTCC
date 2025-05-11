@@ -30,6 +30,7 @@ type Community = {
   data_atualizacao: string
   total_posts: number
   total_usuarios: number
+  id_usuario_criador: string
 }
 
 const ITEMS_PER_PAGE = 6 // Número de itens por página

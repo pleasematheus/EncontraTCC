@@ -3,7 +3,6 @@ import { useNavigate, Link } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
 import { ArrowLeft } from "lucide-react"
 import supabase from "../utils/supabase"
-import { setInterval } from "timers/promises"
 
 const LoginPage = () => {
   const {} = useTheme()
