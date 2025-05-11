@@ -76,7 +76,6 @@ const SolicitarRedefinicaoSenha = () => {
                   required
                 />
               </div>
-
               {message && (
                 <div
                   className={`alert ${
@@ -85,7 +84,8 @@ const SolicitarRedefinicaoSenha = () => {
                 >
                   <p>{message.text}</p>
                 </div>
-              )}              <button
+              )}{" "}
+              <button
                 type="submit"
                 className="btn btn-primary w-full mt-6"
                 disabled={loading}

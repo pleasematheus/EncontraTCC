@@ -217,7 +217,9 @@ export default function CreatePost() {
               </label>
             </div>
 
-            <div className="flex justify-between">              <button
+            <div className="flex justify-between">
+              {" "}
+              <button
                 type="button"
                 onClick={() => navigate(`/c/${discriminador}`)}
                 className="btn btn-outline"

@@ -355,7 +355,8 @@ export default function Communities() {
                 }}
               >
                 Cancelar
-              </button>              <button
+              </button>{" "}
+              <button
                 className="btn btn-primary"
                 onClick={handleCreateCommunity}
                 disabled={

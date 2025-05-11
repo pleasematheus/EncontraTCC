@@ -168,17 +168,18 @@ const PostCards = ({
     setIsLoading(true)
     setErrorMessage("")
 
-    try {      // Verificar se usuário está autenticado
+    try {
+      // Verificar se usuário está autenticado
       const {
         data: { user },
       } = await supabase.auth.getUser()
-      
+
       if (!user) {
         setErrorMessage("Usuário não autenticado")
         setIsLoading(false)
         return
       }
-      
+
       // Excluir post no Supabase
       const { error } = await supabase
         .from("Postagens")
@@ -356,7 +357,8 @@ const PostCards = ({
             disabled={isLoading}
           >
             Cancelar
-          </button>          <button
+          </button>{" "}
+          <button
             type="button"
             onClick={handleDelete}
             className="btn btn-error btn-sm"
@@ -465,7 +467,8 @@ const PostCards = ({
               className="btn btn-outline btn-sm"
             >
               Cancelar
-            </button>            <button
+            </button>{" "}
+            <button
               type="submit"
               className="btn btn-primary btn-sm"
               disabled={isLoading}
@@ -552,7 +555,8 @@ const PostCards = ({
                   className="btn btn-outline btn-sm"
                 >
                   Cancelar
-                </button>                <button
+                </button>{" "}
+                <button
                   type="submit"
                   className="btn btn-primary btn-sm"
                   disabled={isCandidaturaLoading}
@@ -633,7 +637,9 @@ const PostCards = ({
         userType === "Discente" &&
         isFollowing &&
         quantidadeUsuariosCandidatos < 3 && (
-          <div className="mt-4">            <button
+          <div className="mt-4">
+            {" "}
+            <button
               onClick={handleCandidaturaModalOpen}
               className="btn btn-primary btn-sm"
               disabled={isCandidaturaLoading}

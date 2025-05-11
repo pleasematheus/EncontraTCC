@@ -328,7 +328,8 @@ const CadastroPage = () => {
               </div>
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-              )}              <button
+              )}{" "}
+              <button
                 type="submit"
                 className="btn btn-primary w-full mt-6"
                 disabled={isLoading}

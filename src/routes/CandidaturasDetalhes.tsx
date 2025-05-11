@@ -333,7 +333,9 @@ export default function CandidaturasDetalhes() {
       </div>
 
       {candidatura.status === "Pendente" && (
-        <div className="flex gap-2 mt-4">          <button
+        <div className="flex gap-2 mt-4">
+          {" "}
+          <button
             onClick={() => updateCandidaturaStatus(candidatura.id, "Aprovado")}
             className="btn btn-success btn-sm gap-1 flex-1"
             disabled={!!actionLoading}
@@ -348,7 +350,8 @@ export default function CandidaturasDetalhes() {
                 <Check size={16} /> Aprovar
               </>
             )}
-          </button>          <button
+          </button>{" "}
+          <button
             onClick={() => updateCandidaturaStatus(candidatura.id, "Rejeitado")}
             className="btn btn-error btn-sm gap-1 flex-1"
             disabled={!!actionLoading}

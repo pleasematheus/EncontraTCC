@@ -85,7 +85,7 @@ export default function CommunityPage() {
     }
 
     getUserInfo()
-  }, [])  
+  }, [])
 
   // Consulta para buscar os dados da comunidade pelo discriminador
   useEffect(() => {
@@ -153,22 +153,22 @@ export default function CommunityPage() {
   // Consulta para buscar os posts da comunidade pelo ID da comunidade
   useEffect(() => {
     fetchPosts()
-  }, [community])  // Função para atualizar a lista de posts após uma edição ou deleção
+  }, [community]) // Função para atualizar a lista de posts após uma edição ou deleção
   const handlePostUpdate = () => {
     fetchPosts()
-    
+
     // Atualizar a contagem de posts na comunidade após a exclusão
     // Usamos o setState diretamente para refletir a mudança em tempo real
     if (community) {
-      setCommunity(prevCommunity => {
-        if (!prevCommunity) return null;
-        
+      setCommunity((prevCommunity) => {
+        if (!prevCommunity) return null
+
         // Ao excluir um post, decrementamos o contador
         return {
           ...prevCommunity,
-          total_posts: Math.max(prevCommunity.total_posts - 1, 0)
-        };
-      });
+          total_posts: Math.max(prevCommunity.total_posts - 1, 0),
+        }
+      })
     }
   }
 
@@ -268,7 +268,8 @@ export default function CommunityPage() {
               {community ? community.nome : "Carregando..."}
             </h1>
 
-            {userInfo.id && community && !loading && (              <button
+            {userInfo.id && community && !loading && (
+              <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
                 className={`btn ${
@@ -291,13 +292,15 @@ export default function CommunityPage() {
                 )}
               </button>
             )}
-          </div>          {community && (
+          </div>{" "}
+          {community && (
             <div className="mb-6 text-sm text-gray-600">
               <p>Total de membros: {community.total_usuarios}</p>
-              <p className="mt-1">Total de postagens: {community.total_posts}</p>
+              <p className="mt-1">
+                Total de postagens: {community.total_posts}
+              </p>
             </div>
           )}
-
           <div className="grid grid-cols-1 gap-4 mb-6">
             {paginatedPosts.length > 0 ? (
               paginatedPosts.map((post) => (
@@ -317,7 +320,6 @@ export default function CommunityPage() {
               </p>
             )}
           </div>
-
           {/* Paginação */}
           {allPosts.length > POSTS_PER_PAGE && (
             <Pagination

@@ -140,7 +140,6 @@ const RedefinirSenha = () => {
                   </label>
                 )}
               </div>
-
               <div className="form-control w-full mt-4">
                 <label className="label">
                   <span className="label-text">Confirme sua Nova Senha</span>
@@ -163,7 +162,6 @@ const RedefinirSenha = () => {
                   </label>
                 )}
               </div>
-
               {message && (
                 <div
                   className={`alert ${
@@ -172,7 +170,8 @@ const RedefinirSenha = () => {
                 >
                   <p>{message.text}</p>
                 </div>
-              )}              <button
+              )}{" "}
+              <button
                 type="submit"
                 className="btn btn-primary w-full mt-6"
                 disabled={loading}

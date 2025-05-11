@@ -84,10 +84,12 @@ const LoginPage = () => {
                     Esqueceu sua senha?
                   </Link>
                 </label>
-              </div>              {errorMessage && (
+              </div>{" "}
+              {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-              )}              <button 
-                type="submit" 
+              )}{" "}
+              <button
+                type="submit"
                 className="btn btn-primary w-full mt-6"
                 disabled={isLoading}
               >
