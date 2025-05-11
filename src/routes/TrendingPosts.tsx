@@ -3,6 +3,7 @@ import supabase from "../utils/supabase"
 import Header from "../components/Header"
 import Footer from "../components/Footer"
 import PostsCards from "../components/PostsCards"
+import Pagination from "../components/Pagination"
 
 interface Post {
   id: string
@@ -16,6 +17,10 @@ interface Post {
   id_usuario_criador?: string
   candidaturas_abertas?: boolean
   candidaturas_count: number
+  ultima_candidatura?: string
+  comunidade_nome?: string
+  nome_criador?: string
+  total_count?: number
 }
 
 const TrendingPosts = () => {
@@ -23,7 +28,11 @@ const TrendingPosts = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [userType, setUserType] = useState<string | null>(null)
-
+  const [totalCount, setTotalCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [postsPerPage] = useState(9) // Posts por página
+  const [selectedType, setSelectedType] = useState<string | null>(null)
+  
   // Obter tipo do usuário (Discente/Docente)
   const getUserType = async () => {
     try {
@@ -47,7 +56,6 @@ const TrendingPosts = () => {
       return null
     }
   }
-
   useEffect(() => {
     const fetchTrendingPosts = async () => {
       setIsLoading(true)
@@ -55,16 +63,27 @@ const TrendingPosts = () => {
         const userTypeValue = await getUserType()
         setUserType(userTypeValue)
 
-        // Buscar posts trending da materialized view
+        // Calcular o offset com base na página atual
+        const offset = (currentPage - 1) * postsPerPage
+
+        // Buscar posts usando a função getter
         const { data, error } = await supabase
-          .from("trending_posts_week")
-          .select("*")
-          .order("candidaturas_count", { ascending: false })
-          .limit(10)
+          .rpc('get_trending_posts', {
+            p_tipo: selectedType,
+            p_limit: postsPerPage,
+            p_offset: offset
+          })
 
         if (error) throw error
 
-        setPosts(data || [])
+        if (data && data.length > 0) {
+          setPosts(data)
+          // Extrair o total_count do primeiro resultado
+          setTotalCount(data[0]?.total_count || 0)
+        } else {
+          setPosts([])
+          setTotalCount(0)
+        }
       } catch (err: any) {
         console.error("Erro ao carregar posts em alta:", err)
         setError(err.message)
@@ -74,8 +93,7 @@ const TrendingPosts = () => {
     }
 
     fetchTrendingPosts()
-  }, [])
-
+  }, [currentPage, postsPerPage, selectedType])
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -85,6 +103,36 @@ const TrendingPosts = () => {
           <p className="text-gray-600">
             As postagens com mais candidaturas desta semana
           </p>
+        </div>
+
+        {/* Filtro por tipo de post */}
+        <div className="flex justify-center mb-6">
+          <div className="btn-group">
+            <button 
+              className={`btn ${selectedType === null ? 'btn-active' : ''}`}
+              onClick={() => setSelectedType(null)}
+            >
+              Todos
+            </button>
+            <button 
+              className={`btn ${selectedType === 'TCC' ? 'btn-active' : ''}`}
+              onClick={() => setSelectedType('TCC')}
+            >
+              TCCs
+            </button>
+            <button 
+              className={`btn ${selectedType === 'Projeto' ? 'btn-active' : ''}`}
+              onClick={() => setSelectedType('Projeto')}
+            >
+              Projetos
+            </button>
+            <button 
+              className={`btn ${selectedType === 'IC' ? 'btn-active' : ''}`}
+              onClick={() => setSelectedType('IC')}
+            >
+              IC
+            </button>
+          </div>
         </div>
 
         {isLoading ? (
@@ -98,25 +146,56 @@ const TrendingPosts = () => {
         ) : posts.length === 0 ? (
           <div className="text-center my-12">
             <p className="text-xl">Nenhuma postagem em alta esta semana</p>
+            {selectedType && (
+              <button 
+                className="btn btn-primary mt-4"
+                onClick={() => setSelectedType(null)}
+              >
+                Ver todos os tipos
+              </button>
+            )}
           </div>
         ) : (
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {posts.map((post) => (
-              <div key={post.id} className="flex flex-col h-full">
-                <PostsCards
-                  post={post}
-                  isEditable={false}
-                  userType={userType}
-                  isFollowing={true} // Assumindo que são posts populares de comunidades que o usuário pode se interessar
-                />
-                <div className="mt-2 text-center">
-                  <span className="badge badge-primary">
-                    {post.candidaturas_count} candidaturas esta semana
-                  </span>
+          <>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {posts.map((post) => (
+                <div key={post.id} className="flex flex-col h-full">
+                  <PostsCards
+                    post={post}
+                    isEditable={false}
+                    userType={userType}
+                    isFollowing={true} // Assumindo que são posts populares de comunidades que o usuário pode se interessar
+                  />
+                  <div className="mt-2 flex flex-col items-center">
+                    <span className="badge badge-primary mb-1">
+                      {post.candidaturas_count} candidaturas
+                    </span>
+                    {post.comunidade_nome && (
+                      <span className="text-sm text-gray-600">
+                        Comunidade: {post.comunidade_nome}
+                      </span>
+                    )}
+                    {post.nome_criador && (
+                      <span className="text-xs text-gray-500">
+                        Criado por: {post.nome_criador}
+                      </span>
+                    )}
+                  </div>
                 </div>
+              ))}
+            </div>
+            
+            {/* Paginação */}
+            {totalCount > postsPerPage && (
+              <div className="flex justify-center mt-8">
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={Math.ceil(totalCount / postsPerPage)}
+                  onPageChange={(page) => setCurrentPage(page)}
+                />
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
       </main>
       <Footer />

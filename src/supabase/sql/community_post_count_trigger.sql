@@ -1,20 +1,3 @@
--- Trigger para incrementar a quantidade de posts dentro de uma comunidade
--- quando uma nova postagem é criada
-
--- Primeiro, verificamos se a coluna total_posts existe
-DO $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1 
-        FROM information_schema.columns 
-        WHERE table_name = 'Comunidades' AND column_name = 'total_posts'
-    ) THEN
-        ALTER TABLE "Comunidades" ADD COLUMN total_posts integer DEFAULT 0;
-    END IF;
-END
-$$;
-
--- Em seguida, criamos a função que será executada pelo trigger
 CREATE OR REPLACE FUNCTION increment_community_post_count()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -29,7 +12,7 @@ BEGIN
 END;
 $$;
 
--- Criando o trigger para executar após a inserção de um novo post
+-- Trigger para executar após a inserção de um novo post
 DROP TRIGGER IF EXISTS after_post_insert ON "Postagens";
 CREATE TRIGGER after_post_insert
 AFTER INSERT ON "Postagens"
@@ -51,7 +34,7 @@ BEGIN
 END;
 $$;
 
--- Criando o trigger para executar após a exclusão de um post
+-- Trigger para executar após a exclusão de um post
 DROP TRIGGER IF EXISTS after_post_delete ON "Postagens";
 CREATE TRIGGER after_post_delete
 AFTER DELETE ON "Postagens"

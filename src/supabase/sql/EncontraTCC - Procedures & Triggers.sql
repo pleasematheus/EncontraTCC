@@ -59,23 +59,29 @@ END;
 $$;
 
 -- Função para incrementar o contador de usuários em uma comunidade
-CREATE OR REPLACE FUNCTION public.increment_community_users(community_id uuid)
+CREATE OR REPLACE FUNCTION public.increment_community_users(
+  community_id uuid
+)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   UPDATE public."Comunidades"
-  SET total_usuarios = total_usuarios + 1
+    SET total_usuarios = total_usuarios + 1
   WHERE id = community_id;
 END;
 $$;
 
 -- Função para decrementar o contador de usuários em uma comunidade
-CREATE OR REPLACE FUNCTION public.decrement_community_users(community_id uuid)
+CREATE OR REPLACE FUNCTION public.decrement_community_users(
+  community_id uuid
+)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   UPDATE public."Comunidades"

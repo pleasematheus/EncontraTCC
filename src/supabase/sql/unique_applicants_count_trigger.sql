@@ -85,12 +85,18 @@ FOR EACH ROW
 EXECUTE FUNCTION update_unique_applicants_on_delete();
 
 -- Criar função para atualizar a materialized view de trending posts para incluir candidatos únicos
+-- ATENÇÃO: Esta função foi substituída pelo arquivo 'EncontraTCC - Materialized Views.sql'
+-- Manter este arquivo apenas para referência histórica
 CREATE OR REPLACE FUNCTION update_trending_view_with_unique_applicants()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
+    -- DEPRECATED: Não use esta função. Utilize a materialized view mv_trending_posts_week do arquivo EncontraTCC - Materialized Views.sql
+    RAISE WARNING 'Esta função está obsoleta. Use a materialized view mv_trending_posts_week do arquivo EncontraTCC - Materialized Views.sql';
+    
+    /*
     DROP MATERIALIZED VIEW IF EXISTS trending_posts_week;
     
     CREATE MATERIALIZED VIEW trending_posts_week AS
@@ -122,8 +128,7 @@ BEGIN
     GROUP BY 
         p.id, p.comunidade_id, p.titulo, p.descricao, p.tipo, p.prazo, 
         p.data_criacao, p.data_atualizacao, p.id_usuario_criador,
-        p.candidaturas_abertas, com.nome, u.nome
-    ORDER BY 
+        p.candidaturas_abertas, com.nome, u.nome    ORDER BY 
         candidaturas_count DESC;
     
     -- Recriar índices
@@ -135,19 +140,23 @@ BEGIN
 
     CREATE INDEX IF NOT EXISTS idx_trending_posts_comunidade
     ON trending_posts_week (comunidade_id);
+    */
 END;
 $$;
 
--- Executar a função para atualizar a view
-SELECT update_trending_view_with_unique_applicants();
+-- COMENTADO: Não execute esta função automaticamente
+-- SELECT update_trending_view_with_unique_applicants();
 
--- Atualizar a função de refresh para usar a nova definição
+-- ATENÇÃO: Esta função foi substituída pelo arquivo 'EncontraTCC - Materialized Views.sql'
+-- Manter este arquivo apenas para referência histórica
 CREATE OR REPLACE FUNCTION refresh_trending_posts_view()
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
 AS $$
 BEGIN
-  SELECT update_trending_view_with_unique_applicants();
+  -- DEPRECATED: Não use esta função. Utilize a procedure refresh_mv_trending_posts do arquivo EncontraTCC - Materialized Views.sql
+  RAISE WARNING 'Esta função está obsoleta. Use a procedure refresh_mv_trending_posts do arquivo EncontraTCC - Materialized Views.sql';
+  -- SELECT update_trending_view_with_unique_applicants();
 END;
 $$;
