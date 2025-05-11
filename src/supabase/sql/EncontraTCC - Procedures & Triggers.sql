@@ -140,6 +140,30 @@ BEGIN
 END;
 $$;
 
+-- Função para inserir o criador da comunidade como responsável na tabela usuario_comunidade
+CREATE OR REPLACE FUNCTION public.add_community_creator_as_responsible()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+    -- Insere o criador da comunidade na tabela usuario_comunidade como responsável
+    INSERT INTO public."usuario_comunidade" (
+        id_comunidade,
+        id_usuario,
+        tipo,
+        data_entrada
+    ) VALUES (
+        NEW.id,
+        NEW.id_usuario_criador,
+        'seguidor',
+        NOW()
+    );
+    
+    RETURN NEW;
+END;
+$$;
+
 -- =============================================================================
 -- SEÇÃO 4: FUNÇÕES PARA POSTAGENS E CANDIDATURAS
 -- =============================================================================
@@ -283,6 +307,12 @@ CREATE TRIGGER after_candidatura_delete
 AFTER DELETE ON "Candidaturas"
 FOR EACH ROW
 EXECUTE FUNCTION update_unique_applicants_on_delete();
+
+-- Trigger para adicionar o criador da comunidade como responsável na tabela usuario_comunidade
+CREATE TRIGGER after_community_insert
+AFTER INSERT ON "Comunidades"
+FOR EACH ROW
+EXECUTE FUNCTION add_community_creator_as_responsible();
 
 -- =============================================================================
 -- SEÇÃO 6: PERMISSÕES DE EXECUÇÃO
