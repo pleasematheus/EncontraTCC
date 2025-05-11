@@ -156,7 +156,7 @@ BEGIN
     ) VALUES (
         NEW.id,
         NEW.id_usuario_criador,
-        'seguidor',
+        'criador',
         NOW()
     );
     

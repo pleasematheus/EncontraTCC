@@ -24,6 +24,7 @@ interface Community {
   nome: string
   total_usuarios: number
   total_posts: number
+  id_usuario_criador: string
 }
 
 interface UserInfo {
@@ -86,13 +87,12 @@ export default function CommunityPage() {
 
     getUserInfo()
   }, [])
-
   // Consulta para buscar os dados da comunidade pelo discriminador
   useEffect(() => {
     async function fetchCommunity() {
       const { data, error } = await supabase
         .from("Comunidades")
-        .select("id, nome, total_usuarios, total_posts")
+        .select("id, nome, total_usuarios, total_posts, id_usuario_criador")
         .eq("discriminador", discriminador)
         .single()
 
@@ -181,7 +181,6 @@ export default function CommunityPage() {
       isFollowing
     )
   }
-
   // Função para seguir/deixar de seguir a comunidade
   const handleFollowToggle = async () => {
     if (!userInfo.id || !community?.id) return
@@ -189,6 +188,15 @@ export default function CommunityPage() {
     setFollowLoading(true)
     try {
       if (isFollowing) {
+        // Verificar se o usuário é o criador da comunidade
+        if (community.id_usuario_criador === userInfo.id) {
+          alert(
+            "Você não pode deixar de seguir uma comunidade que você criou. Para removê-la, você deve excluir a comunidade."
+          )
+          setFollowLoading(false)
+          return
+        }
+
         // Remover o usuário como seguidor
         const { error } = await supabase
           .from("usuario_comunidade")
@@ -266,15 +274,26 @@ export default function CommunityPage() {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-3xl font-bold">
               {community ? community.nome : "Carregando..."}
-            </h1>
-
+            </h1>{" "}
             {userInfo.id && community && !loading && (
               <button
                 onClick={handleFollowToggle}
-                disabled={followLoading}
+                disabled={
+                  followLoading ||
+                  (community.id_usuario_criador === userInfo.id && isFollowing)
+                }
                 className={`btn ${
-                  isFollowing ? "btn-primary" : "btn-outline btn-primary"
+                  isFollowing
+                    ? community.id_usuario_criador === userInfo.id
+                      ? "btn-primary cursor-not-allowed opacity-70"
+                      : "btn-primary"
+                    : "btn-outline btn-primary"
                 } flex items-center gap-2`}
+                title={
+                  community.id_usuario_criador === userInfo.id && isFollowing
+                    ? "Você não pode deixar de seguir uma comunidade que você criou"
+                    : ""
+                }
               >
                 {followLoading ? (
                   <>
@@ -283,7 +302,10 @@ export default function CommunityPage() {
                   </>
                 ) : isFollowing ? (
                   <>
-                    <UserMinus size={18} /> Seguindo
+                    <UserMinus size={18} />{" "}
+                    {community.id_usuario_criador === userInfo.id
+                      ? "Criador"
+                      : "Seguindo"}
                   </>
                 ) : (
                   <>

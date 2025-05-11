@@ -11,14 +11,20 @@ interface Community {
   total_usuarios: number
   data_criacao: string
   data_atualizacao: string
+  id_usuario_criador: string
 }
 
 interface CommunityCardsProps {
   communities: Community[]
   userId?: string // ID do usuário autenticado
+  createdCommunities?: string[] // IDs das comunidades criadas pelo usuário
 }
 
-const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
+const CommunityCards = ({
+  communities,
+  userId,
+  createdCommunities = [],
+}: CommunityCardsProps) => {
   // estado mapeando id da comunidade -> se está seguindo
   const [followingStatus, setFollowingStatus] = useState<
     Record<string, boolean>
@@ -34,7 +40,6 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
   useEffect(() => {
     setLocalCommunities(communities)
   }, [communities])
-
   // ao montar (ou quando mudar userId/communities), buscar follows do usuário
   useEffect(() => {
     if (!userId) return
@@ -42,9 +47,9 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
     const fetchFollows = async () => {
       const { data, error } = await supabase
         .from("usuario_comunidade")
-        .select("id_comunidade")
+        .select("id_comunidade, tipo")
         .eq("id_usuario", userId)
-        .eq("tipo", "seguidor") // Alterado para usar "seguidor" em vez de "membro"
+        .in("tipo", ["seguidor", "criador"]) // Busca tanto seguidores quanto criadores
 
       if (error) {
         console.error("Erro ao buscar comunidades seguidas:", error)
@@ -56,16 +61,30 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
       data.forEach((row) => {
         status[row.id_comunidade] = true
       })
-      // garante que todas as comunidades tenham um valor booleano
+
+      // Adicionar comunidades criadas pelo usuário (pelo ID do criador)
       communities.forEach((c) => {
-        if (status[c.id] === undefined) status[c.id] = false
+        if (c.id_usuario_criador === userId) {
+          status[c.id] = true
+        }
+        // garante que todas as comunidades tenham um valor booleano
+        if (status[c.id] === undefined) {
+          status[c.id] = false
+        }
       })
+
+      // Marca as comunidades criadas pelo usuário
+      if (createdCommunities.length > 0) {
+        createdCommunities.forEach((id) => {
+          status[id] = true
+        })
+      }
 
       setFollowingStatus(status)
     }
 
     fetchFollows()
-  }, [userId, communities])
+  }, [userId, communities, createdCommunities])
 
   // alterna o estado de follow e sincroniza com o Supabase
   const handleFollowToggle = async (communityId: string) => {
@@ -111,6 +130,19 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
           )
         )
       } else {
+        // Verificar se o usuário é o criador da comunidade
+        const community = localCommunities.find((c) => c.id === communityId)
+        if (community && community.id_usuario_criador === userId) {
+          alert(
+            "Você não pode deixar de seguir uma comunidade que você criou. Para removê-la, você deve excluir a comunidade."
+          )
+          setFollowLoading((prev) => ({
+            ...prev,
+            [communityId]: false,
+          }))
+          return
+        }
+
         // Remover o usuário como seguidor
         const { error } = await supabase
           .from("usuario_comunidade")
@@ -215,21 +247,36 @@ const CommunityCards = ({ communities, userId }: CommunityCardsProps) => {
                       className="btn btn-outline btn-sm"
                     >
                       Ver mais
-                    </a>
+                    </a>{" "}
                     <button
                       onClick={() => handleFollowToggle(community.id)}
-                      disabled={isLoading(community.id)}
+                      disabled={
+                        isLoading(community.id) ||
+                        (community.id_usuario_criador === userId &&
+                          isFollowing(community.id))
+                      }
                       className={`btn btn-sm ${
                         isFollowing(community.id)
-                          ? "btn-primary"
+                          ? community.id_usuario_criador === userId
+                            ? "btn-primary cursor-not-allowed opacity-70"
+                            : "btn-primary"
                           : "btn-outline btn-primary"
                       } flex items-center gap-2`}
+                      title={
+                        community.id_usuario_criador === userId &&
+                        isFollowing(community.id)
+                          ? "Você não pode deixar de seguir uma comunidade que você criou"
+                          : ""
+                      }
                     >
                       {isLoading(community.id) ? (
                         <span className="loading loading-spinner loading-xs"></span>
                       ) : isFollowing(community.id) ? (
                         <>
-                          <UserMinus size={16} /> Seguindo
+                          <UserMinus size={16} />{" "}
+                          {community.id_usuario_criador === userId
+                            ? "Criador"
+                            : "Seguindo"}
                         </>
                       ) : (
                         <>

@@ -16,6 +16,7 @@ interface Community {
   data_criacao: string
   data_atualizacao: string
   discriminador: string
+  id_usuario_criador: string
   is_following?: boolean // Adicionado para controle de seguidores
 }
 
@@ -38,6 +39,7 @@ export default function Communities() {
   const [discriminador, setDiscriminador] = useState("")
   const [submitting, setSubmitting] = useState(false)
   const [userId, setUserId] = useState<string | null>(null) // ID do usuário atual
+  const [createdCommunities, setCreatedCommunities] = useState<string[]>([]) // IDs de comunidades criadas pelo usuário
 
   // Função para lidar com a mudança de página
   const handlePageChange = (page: number) => {
@@ -116,38 +118,56 @@ export default function Communities() {
       return
     }
 
-    // Busca relações de seguidor para o usuário atual
-    const { data: followingData, error: followingError } = await supabase
-      .from("usuario_comunidade")
-      .select("id_comunidade")
-      .eq("id_usuario", userId)
-      .eq("tipo", "seguidor") // Corrigido para usar "tipo" conforme a estrutura da tabela
+    // Buscar relações de comunidades para o usuário
+    if (userId) {
+      const { data: userCommunityData, error: userCommunityError } =
+        await supabase
+          .from("usuario_comunidade")
+          .select("id_comunidade, tipo")
+          .eq("id_usuario", userId)
+          .in("tipo", ["seguidor", "criador"]) // Buscar as relações de seguidor e criador
 
-    if (followingError) {
-      console.error("Erro ao buscar comunidades seguidas:", followingError)
+      if (userCommunityError) {
+        console.error(
+          "Erro ao buscar relações de comunidades:",
+          userCommunityError
+        )
+      }
+
+      // Cria um Set com IDs das comunidades seguidas para busca eficiente
+      const followingSet = new Set(
+        (userCommunityData || []).map((item) => item.id_comunidade)
+      )
+
+      // Cria um Set com IDs das comunidades que o usuário criou
+      const createdSet = new Set(
+        (userCommunityData || [])
+          .filter((item) => item.tipo === "criador")
+          .map((item) => item.id_comunidade)
+      )
+
+      // Atualiza o estado com as comunidades criadas
+      setCreatedCommunities(Array.from(createdSet))
+
+      // Marca as comunidades seguidas pelo usuário
+      const communitiesWithFollowStatus = (communitiesData || []).map(
+        (community) => ({
+          ...community,
+          is_following:
+            followingSet.has(community.id) ||
+            community.id_usuario_criador === userId,
+        })
+      )
+
+      setAllCommunities(communitiesWithFollowStatus)
+      setPaginatedCommunities(
+        communitiesWithFollowStatus.slice(0, ITEMS_PER_PAGE)
+      )
+      setTotalPages(
+        Math.ceil(communitiesWithFollowStatus.length / ITEMS_PER_PAGE) || 1
+      )
+      setLoading(false)
     }
-
-    // Cria um Set com IDs das comunidades seguidas para busca eficiente
-    const followingSet = new Set(
-      (followingData || []).map((item) => item.id_comunidade)
-    )
-
-    // Marca as comunidades seguidas pelo usuário
-    const communitiesWithFollowStatus = (communitiesData || []).map(
-      (community) => ({
-        ...community,
-        is_following: followingSet.has(community.id),
-      })
-    )
-
-    setAllCommunities(communitiesWithFollowStatus)
-    setPaginatedCommunities(
-      communitiesWithFollowStatus.slice(0, ITEMS_PER_PAGE)
-    )
-    setTotalPages(
-      Math.ceil(communitiesWithFollowStatus.length / ITEMS_PER_PAGE) || 1
-    )
-    setLoading(false)
   }
   // Carrega as comunidades quando o componente é montado ou userId muda
   useEffect(() => {
@@ -212,34 +232,59 @@ export default function Communities() {
       alert("Apenas docentes podem criar comunidades.")
       setSubmitting(false)
       return
-    }
-
-    // Inserir a nova comunidade, utilizando o id da tabela Usuarios para id_usuario_criador.
-    const { error } = await supabase.from("Comunidades").insert([
-      {
-        nome,
-        descricao,
-        discriminador,
-        id_usuario_criador: usuarioData.id, // Esse valor está de acordo com a FK da tabela "Usuarios"
-        total_posts: 0,
-        total_usuarios: 1,
-        data_atualizacao: new Date().toISOString(),
-      },
-    ])
+    } // Inserir a nova comunidade, utilizando o id da tabela Usuarios para id_usuario_criador.
+    const { data: novaComunidade, error } = await supabase
+      .from("Comunidades")
+      .insert([
+        {
+          nome,
+          descricao,
+          discriminador,
+          id_usuario_criador: usuarioData.id, // Esse valor está de acordo com a FK da tabela "Usuarios"
+          total_posts: 0,
+          total_usuarios: 1,
+          data_atualizacao: new Date().toISOString(),
+        },
+      ])
+      .select()
 
     if (error) {
       console.error("Erro ao criar comunidade:", error)
-    } else {
-      // Limpa os campos e fecha o modal.
-      setNome("")
-      setDescricao("")
-      setDiscriminador("")
-      setModalOpen(false)
-      // Atualiza a lista de comunidades para incluir a nova.
-      await getComunidades()
-      // Volta para a primeira página após criar uma nova comunidade
-      setCurrentPage(1)
+      setSubmitting(false)
+      return
     }
+
+    // Adicionar o usuário como criador na tabela usuario_comunidade
+    const comunidadeId = novaComunidade[0].id
+    const { error: relacaoError } = await supabase
+      .from("usuario_comunidade")
+      .insert([
+        {
+          id_usuario: usuarioData.id,
+          id_comunidade: comunidadeId,
+          tipo: "criador", // Tipo "criador" para indicar que este usuário criou a comunidade
+          data_adicao: new Date().toISOString(),
+        },
+      ])
+
+    if (relacaoError) {
+      console.error(
+        "Erro ao registrar usuário como criador da comunidade:",
+        relacaoError
+      )
+      // Se falhar ao registrar a relação, ainda podemos prosseguir, mas logamos o erro
+    }
+
+    // Limpa os campos e fecha o modal.
+    setNome("")
+    setDescricao("")
+    setDiscriminador("")
+    setModalOpen(false)
+    // Atualiza a lista de comunidades para incluir a nova.
+    await getComunidades()
+    // Volta para a primeira página após criar uma nova comunidade
+    setCurrentPage(1)
+
     setSubmitting(false)
   }
 
@@ -268,6 +313,7 @@ export default function Communities() {
             <CommunityCards
               communities={paginatedCommunities}
               userId={userId || undefined}
+              createdCommunities={createdCommunities}
             />
 
             {/* Componente de paginação */}
