@@ -31,7 +31,6 @@ const TrendingPosts = () => {
   const [totalCount, setTotalCount] = useState(0)
   const [currentPage, setCurrentPage] = useState(1)
   const [postsPerPage] = useState(9) // Posts por página
-  const [selectedType, setSelectedType] = useState<string | null>(null)
 
   // Obter tipo do usuário (Discente/Docente)
   const getUserType = async () => {
@@ -56,6 +55,7 @@ const TrendingPosts = () => {
       return null
     }
   }
+
   useEffect(() => {
     const fetchTrendingPosts = async () => {
       setIsLoading(true)
@@ -68,7 +68,6 @@ const TrendingPosts = () => {
 
         // Buscar posts usando a função getter
         const { data, error } = await supabase.rpc("get_trending_posts", {
-          p_tipo: selectedType,
           p_limit: postsPerPage,
           p_offset: offset,
         })
@@ -92,7 +91,8 @@ const TrendingPosts = () => {
     }
 
     fetchTrendingPosts()
-  }, [currentPage, postsPerPage, selectedType])
+  }, [currentPage, postsPerPage])
+
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
@@ -102,38 +102,6 @@ const TrendingPosts = () => {
           <p className="text-gray-600">
             As postagens com mais candidaturas desta semana
           </p>
-        </div>
-
-        {/* Filtro por tipo de post */}
-        <div className="flex justify-center mb-6">
-          <div className="btn-group">
-            <button
-              className={`btn ${selectedType === null ? "btn-active" : ""}`}
-              onClick={() => setSelectedType(null)}
-            >
-              Todos
-            </button>
-            <button
-              className={`btn ${selectedType === "TCC" ? "btn-active" : ""}`}
-              onClick={() => setSelectedType("TCC")}
-            >
-              TCCs
-            </button>
-            <button
-              className={`btn ${
-                selectedType === "Projeto" ? "btn-active" : ""
-              }`}
-              onClick={() => setSelectedType("Projeto")}
-            >
-              Projetos
-            </button>
-            <button
-              className={`btn ${selectedType === "IC" ? "btn-active" : ""}`}
-              onClick={() => setSelectedType("IC")}
-            >
-              IC
-            </button>
-          </div>
         </div>
 
         {isLoading ? (
@@ -147,14 +115,6 @@ const TrendingPosts = () => {
         ) : posts.length === 0 ? (
           <div className="text-center my-12">
             <p className="text-xl">Nenhuma postagem em alta esta semana</p>
-            {selectedType && (
-              <button
-                className="btn btn-primary mt-4"
-                onClick={() => setSelectedType(null)}
-              >
-                Ver todos os tipos
-              </button>
-            )}
           </div>
         ) : (
           <>

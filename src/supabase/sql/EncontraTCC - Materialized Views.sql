@@ -12,6 +12,10 @@
 -- SEÇÃO 1: CONFIGURAÇÃO E CRIAÇÃO DE MATERIALIZED VIEWS
 -- =============================================================================
 
+-- IMPORTANTE: As conversões de tipo explícitas (::text, ::uuid, etc.) são essenciais para 
+-- evitar o erro "structure of query does not match function result type" quando a função 
+-- get_trending_posts é chamada. Não remova essas conversões!
+
 -- 0) Remover versões antigas das views (se existirem)
 /*DROP MATERIALIZED VIEW IF EXISTS trending_posts_week;
 DROP MATERIALIZED VIEW IF EXISTS private.trending_posts_week;*/
@@ -22,20 +26,20 @@ CREATE SCHEMA IF NOT EXISTS private;
 -- 2) Criar a materialized view dentro do schema private
 CREATE MATERIALIZED VIEW IF NOT EXISTS private.mv_trending_posts_week AS
 SELECT
-  p.id,
-  p.comunidade_id,
-  p.titulo,
-  p.descricao,
-  p.tipo,
-  p.prazo,
-  p.data_criacao,
-  p.data_atualizacao,
-  p.id_usuario_criador,
-  p.candidaturas_abertas,
-  COUNT(c.id)             AS candidaturas_count,
-  MAX(c.data_candidatura) AS ultima_candidatura,
-  com.nome    AS comunidade_nome,
-  u.nome      AS nome_criador
+  p.id::uuid,
+  p.comunidade_id::uuid,
+  p.titulo::text,  -- Conversão explícita para text para evitar incompatibilidade de tipo varchar(255)
+  p.descricao::text,
+  p.tipo::text,
+  p.prazo::timestamptz,
+  p.data_criacao::timestamptz,
+  p.data_atualizacao::timestamptz,
+  p.id_usuario_criador::uuid,
+  p.candidaturas_abertas::boolean,
+  COUNT(c.id)::bigint             AS candidaturas_count,
+  MAX(c.data_candidatura)::timestamptz AS ultima_candidatura,
+  com.nome::text    AS comunidade_nome,
+  u.nome::text      AS nome_criador
 FROM
   "Postagens" p
   LEFT JOIN "Candidaturas" c
@@ -57,10 +61,9 @@ GROUP BY
   p.data_atualizacao,
   p.id_usuario_criador,
   p.candidaturas_abertas,
-  com.nome,
-  u.nome
+  com.nome,  u.nome
 ORDER BY
-  ultima_candidatura DESC,
+  ultima_candidatura DESC NULLS LAST,
   candidaturas_count DESC;
 
 
@@ -122,26 +125,26 @@ SELECT
 -- FUNÇÃO GETTER PARA A MATERIALIZED VIEW
 -- =============================================================================
 
--- 7) RPC "getter" com filtros e paginação, referenciando explicitamente private.mv_trending_posts_week
+-- 7) Dropa versões antigas da função, se existirem
+DROP FUNCTION IF EXISTS public.get_trending_posts(uuid, text, integer, integer);
+
+-- 8) RPC "getter" com filtros e paginação, referenciando explicitamente private.mv_trending_posts_week
 CREATE OR REPLACE FUNCTION public.get_trending_posts(
   p_comunidade_id uuid    DEFAULT NULL,
-  p_tipo          text    DEFAULT NULL,
   p_limit         integer DEFAULT 10,
   p_offset        integer DEFAULT 0
 )
 RETURNS TABLE (
   id                  uuid,
-  comunidade_id       uuid,
-  titulo              text,
+  comunidade_id       uuid,  titulo              text,
   descricao           text,
   tipo                text,
-  prazo               timestamp with time zone,
-  data_criacao        timestamp with time zone,
-  data_atualizacao    timestamp with time zone,
+  prazo               timestamptz,
+  data_criacao        timestamptz,
+  data_atualizacao    timestamptz,
   id_usuario_criador  uuid,
-  candidaturas_abertas boolean,
-  candidaturas_count  bigint,
-  ultima_candidatura  timestamp with time zone,
+  candidaturas_abertas boolean,  candidaturas_count  bigint,
+  ultima_candidatura  timestamptz,
   comunidade_nome     text,
   nome_criador        text,
   total_count         bigint
@@ -156,8 +159,7 @@ BEGIN
   -- calcula o total de linhas para paginação
   SELECT COUNT(*) INTO v_total_count
     FROM private.mv_trending_posts_week t
-   WHERE (p_comunidade_id IS NULL OR t.comunidade_id = p_comunidade_id)
-     AND (p_tipo          IS NULL OR t.tipo           = p_tipo);
+   WHERE (p_comunidade_id IS NULL OR t.comunidade_id = p_comunidade_id);
 
   -- retorna os dados paginados + total_count em cada linha
   RETURN QUERY
@@ -176,24 +178,21 @@ BEGIN
     t.ultima_candidatura,
     t.comunidade_nome,
     t.nome_criador,
-    v_total_count
-  FROM private.mv_trending_posts_week t
+    v_total_count  FROM private.mv_trending_posts_week t
   WHERE (p_comunidade_id IS NULL OR t.comunidade_id = p_comunidade_id)
-    AND (p_tipo          IS NULL OR t.tipo           = p_tipo)
   ORDER BY
-    t.ultima_candidatura DESC,
+    t.ultima_candidatura DESC NULLS LAST,
     t.candidaturas_count DESC
   LIMIT  p_limit
   OFFSET p_offset;
 END;
 $$;
 
-COMMENT ON FUNCTION public.get_trending_posts(uuid, text, integer, integer) IS
-  'Retorna posts em tendência da materialized view private.mv_trending_posts_week com filtros e paginação';
+COMMENT ON FUNCTION public.get_trending_posts(uuid, integer, integer) IS  'Retorna posts em tendência da materialized view private.mv_trending_posts_week com filtros e paginação';
 
 
--- 8) Conceder permissão de execução apenas a usuários autenticados
+-- 9) Conceder permissão de execução apenas a usuários autenticados
 GRANT EXECUTE
-  ON FUNCTION public.get_trending_posts(uuid, text, integer, integer)
+  ON FUNCTION public.get_trending_posts(uuid, integer, integer)
   TO authenticated;
 
