@@ -477,7 +477,7 @@ export default function CommunityPage() {
               {isCreator && community && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setEditModalOpen(true)}
+                    onClick={openEditModal}
                     className="btn btn-outline btn-info flex items-center gap-2"
                     title="Editar comunidade"
                   >
