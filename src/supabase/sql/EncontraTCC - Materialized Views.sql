@@ -13,8 +13,8 @@
 -- =============================================================================
 
 -- 0) Remover versões antigas das views (se existirem)
-DROP MATERIALIZED VIEW IF EXISTS trending_posts_week;
-DROP MATERIALIZED VIEW IF EXISTS private.trending_posts_week;
+/*DROP MATERIALIZED VIEW IF EXISTS trending_posts_week;
+DROP MATERIALIZED VIEW IF EXISTS private.trending_posts_week;*/
 
 -- 1) Criar schema privado para materialized views
 CREATE SCHEMA IF NOT EXISTS private;

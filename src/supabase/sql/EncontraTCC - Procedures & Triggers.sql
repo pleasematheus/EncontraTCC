@@ -117,6 +117,7 @@ CREATE OR REPLACE FUNCTION public.increment_community_posts(community_id uuid)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   UPDATE public."Comunidades"
@@ -130,6 +131,7 @@ CREATE OR REPLACE FUNCTION public.decrement_community_posts(community_id uuid)
 RETURNS void
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public
 AS $$
 BEGIN
   UPDATE public."Comunidades"
@@ -143,9 +145,10 @@ $$;
 -- =============================================================================
 
 -- Função para incrementar o contador de posts em uma comunidade via trigger
-CREATE OR REPLACE FUNCTION increment_community_post_count()
+CREATE OR REPLACE FUNCTION public.increment_community_post_count()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 BEGIN
     -- Incrementa a contagem de posts na comunidade correspondente
@@ -157,10 +160,27 @@ BEGIN
 END;
 $$;
 
--- Função para atualizar a contagem de candidatos após inserção de candidatura
-CREATE OR REPLACE FUNCTION update_unique_applicants_count()
+-- Função para decrementar quando um post é removido via trigger
+CREATE OR REPLACE FUNCTION public.decrement_community_post_count()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SET search_path = public
+AS $$
+BEGIN
+    -- Decrementa a contagem de posts na comunidade correspondente
+    UPDATE "Comunidades"
+    SET total_posts = GREATEST(total_posts - 1, 0)
+    WHERE id = OLD.comunidade_id;
+    
+    RETURN OLD;
+END;
+$$;
+
+-- Função para atualizar a contagem de candidatos após inserção de candidatura
+CREATE OR REPLACE FUNCTION public.update_unique_applicants_count()
+RETURNS TRIGGER
+LANGUAGE plpgsql
+SET search_path = public
 AS $$
 DECLARE
     already_applied boolean;
@@ -186,9 +206,10 @@ END;
 $$;
 
 -- Função para atualizar a contagem quando uma candidatura é removida
-CREATE OR REPLACE FUNCTION update_unique_applicants_on_delete()
+CREATE OR REPLACE FUNCTION public.update_unique_applicants_on_delete()
 RETURNS TRIGGER
 LANGUAGE plpgsql
+SET search_path = public
 AS $$
 DECLARE
     other_applications boolean;
@@ -236,28 +257,28 @@ WHEN (OLD.email IS DISTINCT FROM NEW.email)
 EXECUTE FUNCTION public.sp_sync_usuario_email();
 
 -- Trigger para executar após a inserção de um novo post
-DROP TRIGGER IF EXISTS after_post_insert ON "Postagens";
+/*DROP TRIGGER IF EXISTS after_post_insert ON "Postagens";*/
 CREATE TRIGGER after_post_insert
 AFTER INSERT ON "Postagens"
 FOR EACH ROW
 EXECUTE FUNCTION increment_community_post_count();
 
 -- Trigger para executar após a exclusão de um post
-DROP TRIGGER IF EXISTS after_post_delete ON "Postagens";
+/*DROP TRIGGER IF EXISTS after_post_delete ON "Postagens";*/
 CREATE TRIGGER after_post_delete
 AFTER DELETE ON "Postagens"
 FOR EACH ROW
 EXECUTE FUNCTION decrement_community_post_count();
 
 -- Trigger para contagem de candidaturas
-DROP TRIGGER IF EXISTS after_candidatura_insert ON "Candidaturas";
+/*DROP TRIGGER IF EXISTS after_candidatura_insert ON "Candidaturas";*/
 CREATE TRIGGER after_candidatura_insert
 AFTER INSERT ON "Candidaturas"
 FOR EACH ROW
 EXECUTE FUNCTION update_unique_applicants_count();
 
 -- Trigger para atualização quando candidatura é removida
-DROP TRIGGER IF EXISTS after_candidatura_delete ON "Candidaturas";
+/*DROP TRIGGER IF EXISTS after_candidatura_delete ON "Candidaturas";*/
 CREATE TRIGGER after_candidatura_delete
 AFTER DELETE ON "Candidaturas"
 FOR EACH ROW
@@ -275,104 +296,6 @@ GRANT EXECUTE ON FUNCTION public.sp_insert_usuario(uuid, text, text, text) TO an
 -- Conceder permissões para funções de posts
 GRANT EXECUTE ON FUNCTION public.increment_community_posts(uuid) TO authenticated;
 GRANT EXECUTE ON FUNCTION public.decrement_community_posts(uuid) TO authenticated;
-
--- Criar trigger para execução após remoção de candidatura
-DROP TRIGGER IF EXISTS after_candidatura_delete ON "Candidaturas";
-CREATE TRIGGER after_candidatura_delete
-AFTER DELETE ON "Candidaturas"
-FOR EACH ROW
-EXECUTE FUNCTION update_unique_applicants_on_delete();
-
--- Função para incrementar o contador de posts em uma comunidade via trigger
-CREATE OR REPLACE FUNCTION increment_community_post_count()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    -- Incrementa a contagem de posts na comunidade correspondente
-    UPDATE "Comunidades"
-    SET total_posts = total_posts + 1
-    WHERE id = NEW.comunidade_id;
-    
-    RETURN NEW;
-END;
-$$;
-
--- Função para decrementar quando um post é removido via trigger
-CREATE OR REPLACE FUNCTION decrement_community_post_count()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-BEGIN
-    -- Decrementa a contagem de posts na comunidade correspondente
-    UPDATE "Comunidades"
-    SET total_posts = GREATEST(total_posts - 1, 0)
-    WHERE id = OLD.comunidade_id;
-    
-    RETURN OLD;
-END;
-$$;
-
--- Função para atualizar a contagem de candidatos após inserção de candidatura
-CREATE OR REPLACE FUNCTION update_unique_applicants_count()
-RETURNS TRIGGER
-LANGUAGE plpgsql
-AS $$
-DECLARE
-    already_applied boolean;
-BEGIN
-    -- Verificar se o usuário já tem candidaturas anteriores para esta postagem
-    SELECT EXISTS (
-        SELECT 1 
-        FROM "Candidaturas" 
-        WHERE postagem_id = NEW.postagem_id 
-          AND usuario_id = NEW.usuario_id 
-          AND id != NEW.id
-    ) INTO already_applied;
-    
-    -- Se o usuário não tinha candidaturas anteriores para esta postagem, incrementar o contador
-    IF NOT already_applied THEN
-        UPDATE "Postagens"
-        SET candidaturas = candidaturas + 1
-        WHERE id = NEW.postagem_id;
-    END IF;
-    
-    RETURN NEW;
-END;
-$$;
-
--- Trigger para executar após a exclusão de um post
-DROP TRIGGER IF EXISTS after_post_delete ON "Postagens";
-CREATE TRIGGER after_post_delete
-AFTER DELETE ON "Postagens"
-FOR EACH ROW
-EXECUTE FUNCTION decrement_community_post_count();
-
--- Função para incrementar o contador de posts em uma comunidade via API
-CREATE OR REPLACE FUNCTION public.increment_community_posts(community_id uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  UPDATE public."Comunidades"
-  SET total_posts = total_posts + 1
-  WHERE id = community_id;
-END;
-$$;
-
--- Função para decrementar o contador de posts em uma comunidade via API
-CREATE OR REPLACE FUNCTION public.decrement_community_posts(community_id uuid)
-RETURNS void
-LANGUAGE plpgsql
-SECURITY DEFINER
-AS $$
-BEGIN
-  UPDATE public."Comunidades"
-  SET total_posts = GREATEST(total_posts - 1, 0) -- Evita números negativos
-  WHERE id = community_id;
-END;
-$$;
 
 -- Conceder permissões para funções
 GRANT EXECUTE ON FUNCTION public.increment_community_posts(uuid) TO authenticated;
