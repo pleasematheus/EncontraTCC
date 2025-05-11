@@ -15,6 +15,8 @@ import CandidaturasDetalhes from "./CandidaturasDetalhes"
 import SearchResults from "./SearchResults"
 import SaibaMais from "./SaibaMais"
 import TrendingPosts from "./TrendingPosts"
+import SolicitarRedefinicaoSenha from "./SolicitarRedefinicaoSenha"
+import RedefinirSenha from "./RedefinirSenha"
 
 const router = createBrowserRouter([
   {
@@ -105,6 +107,14 @@ const router = createBrowserRouter([
         <SearchResults />
       </ProtectedRoute>
     ),
+  },
+  {
+    path: "/solicitar-redefinicao-senha",
+    element: <SolicitarRedefinicaoSenha />,
+  },
+  {
+    path: "/redefinir-senha",
+    element: <RedefinirSenha />,
   },
 ])
 

@@ -59,7 +59,7 @@ const LoginPage = () => {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />
-              </div>
+              </div>{" "}
               <div className="form-control w-full mt-4">
                 <label className="label">
                   <span className="label-text">Senha</span>
@@ -71,6 +71,14 @@ const LoginPage = () => {
                   value={senha}
                   onChange={(e) => setSenha(e.target.value)}
                 />
+                <label className="label">
+                  <Link
+                    to="/solicitar-redefinicao-senha"
+                    className="label-text-alt link link-hover text-secondary"
+                  >
+                    Esqueceu sua senha?
+                  </Link>
+                </label>
               </div>
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>

@@ -17,13 +17,19 @@ const Profile = () => {
   })
   const [loading, setLoading] = useState(true)
   const [editMode, setEditMode] = useState(false)
+  const [changePasswordMode, setChangePasswordMode] = useState(false)
   const [newNome, setNewNome] = useState("")
   const [newTipo, setNewTipo] = useState("")
+  const [currentPassword, setCurrentPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
   const [saving, setSaving] = useState(false)
+  const [changingPassword, setChangingPassword] = useState(false)
   const [message, setMessage] = useState<{
     text: string
     type: "success" | "error"
   } | null>(null)
+  const [passwordError, setPasswordError] = useState<string | null>(null)
 
   useEffect(() => {
     const getUser = async () => {
@@ -107,6 +113,55 @@ const Profile = () => {
     }
   }
 
+  const handleChangePassword = async () => {
+    try {
+      setChangingPassword(true)
+      setPasswordError(null)
+      setMessage(null)
+
+      // Validar as senhas
+      if (newPassword.length < 6) {
+        setPasswordError("A nova senha deve ter pelo menos 6 caracteres")
+        return
+      }
+
+      if (newPassword !== confirmPassword) {
+        setPasswordError("As senhas não coincidem")
+        return
+      }
+
+      // Verificar a senha atual
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: user.email || "",
+        password: currentPassword,
+      })
+
+      if (signInError) {
+        setPasswordError("Senha atual incorreta")
+        return
+      }
+
+      // Atualizar a senha
+      const { error } = await supabase.auth.updateUser({
+        password: newPassword,
+      })
+
+      if (error) throw error
+
+      // Limpar os campos
+      setCurrentPassword("")
+      setNewPassword("")
+      setConfirmPassword("")
+      setChangePasswordMode(false)
+      setMessage({ text: "Senha alterada com sucesso!", type: "success" })
+    } catch (error) {
+      console.error("Erro ao alterar senha:", error)
+      setPasswordError("Erro ao alterar senha. Tente novamente.")
+    } finally {
+      setChangingPassword(false)
+    }
+  }
+
   const tiposUsuario = ["Docente", "Discente"]
 
   return (
@@ -126,8 +181,7 @@ const Profile = () => {
                   {user.nome?.charAt(0)?.toUpperCase() || "?"}
                 </span>
               </div>
-            </div>
-
+            </div>{" "}
             {message && (
               <div
                 className={`alert ${
@@ -137,18 +191,107 @@ const Profile = () => {
                 <span>{message.text}</span>
               </div>
             )}
-
-            {!editMode ? (
+            {!editMode && !changePasswordMode ? (
               <>
                 <h1 className="text-left">Nome: {user.nome}</h1>
                 <p>Email: {user.email}</p>
                 <p>Tipo: {user.tipo}</p>
-                <button
-                  className="btn btn-primary"
-                  onClick={() => setEditMode(true)}
-                >
-                  Editar Perfil
-                </button>
+                <div className="flex flex-col gap-2">
+                  <button
+                    className="btn btn-primary"
+                    onClick={() => {
+                      setEditMode(true)
+                      setChangePasswordMode(false)
+                    }}
+                  >
+                    Editar Perfil
+                  </button>
+                  <button
+                    className="btn btn-outline btn-primary"
+                    onClick={() => {
+                      setChangePasswordMode(true)
+                      setEditMode(false)
+                    }}
+                  >
+                    Alterar Senha
+                  </button>
+                </div>
+              </>
+            ) : changePasswordMode ? (
+              <>
+                <h2 className="text-xl font-semibold pt-2">Alterar Senha</h2>
+
+                {passwordError && (
+                  <div className="alert alert-error mt-2">
+                    <span>{passwordError}</span>
+                  </div>
+                )}
+
+                <div className="form-control w-full">
+                  <label className="label">
+                    <span className="label-text">Senha Atual</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Digite sua senha atual"
+                    className="input input-bordered w-full"
+                    value={currentPassword}
+                    onChange={(e) => setCurrentPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-control w-full">
+                  <label className="label">
+                    <span className="label-text">Nova Senha</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Digite sua nova senha"
+                    className="input input-bordered w-full"
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="form-control w-full">
+                  <label className="label">
+                    <span className="label-text">Confirme a Nova Senha</span>
+                  </label>
+                  <input
+                    type="password"
+                    placeholder="Confirme sua nova senha"
+                    className="input input-bordered w-full"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                  />
+                </div>
+
+                <div className="flex gap-2">
+                  <button
+                    className="btn btn-primary flex-1"
+                    onClick={handleChangePassword}
+                    disabled={changingPassword}
+                  >
+                    {changingPassword ? (
+                      <span className="loading loading-spinner loading-sm"></span>
+                    ) : (
+                      "Salvar Nova Senha"
+                    )}
+                  </button>
+                  <button
+                    className="btn btn-outline flex-1"
+                    onClick={() => {
+                      setChangePasswordMode(false)
+                      setCurrentPassword("")
+                      setNewPassword("")
+                      setConfirmPassword("")
+                      setPasswordError(null)
+                    }}
+                    disabled={changingPassword}
+                  >
+                    Cancelar
+                  </button>
+                </div>
               </>
             ) : (
               <>
@@ -218,6 +361,7 @@ const Profile = () => {
                     }}
                     disabled={saving}
                   >
+                    {" "}
                     Cancelar
                   </button>
                 </div>
