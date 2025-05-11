@@ -333,30 +333,36 @@ export default function CandidaturasDetalhes() {
       </div>
 
       {candidatura.status === "Pendente" && (
-        <div className="flex gap-2 mt-4">
-          <button
+        <div className="flex gap-2 mt-4">          <button
             onClick={() => updateCandidaturaStatus(candidatura.id, "Aprovado")}
             className="btn btn-success btn-sm gap-1 flex-1"
             disabled={!!actionLoading}
           >
             {actionLoading === candidatura.id ? (
-              <span className="loading loading-spinner loading-xs"></span>
+              <>
+                <span className="loading loading-spinner loading-xs mr-2"></span>
+                Aprovar
+              </>
             ) : (
-              <Check size={16} />
+              <>
+                <Check size={16} /> Aprovar
+              </>
             )}
-            Aprovar
-          </button>
-          <button
+          </button>          <button
             onClick={() => updateCandidaturaStatus(candidatura.id, "Rejeitado")}
             className="btn btn-error btn-sm gap-1 flex-1"
             disabled={!!actionLoading}
           >
             {actionLoading === candidatura.id ? (
-              <span className="loading loading-spinner loading-xs"></span>
+              <>
+                <span className="loading loading-spinner loading-xs mr-2"></span>
+                Rejeitar
+              </>
             ) : (
-              <X size={16} />
+              <>
+                <X size={16} /> Rejeitar
+              </>
             )}
-            Rejeitar
           </button>
         </div>
       )}

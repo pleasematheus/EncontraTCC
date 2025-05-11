@@ -3,6 +3,7 @@ import { useNavigate, Link } from "react-router-dom"
 import { useTheme } from "@/hooks/useTheme"
 import { ArrowLeft } from "lucide-react"
 import supabase from "../utils/supabase"
+import { setInterval } from "timers/promises"
 
 const LoginPage = () => {
   const {} = useTheme()
@@ -10,11 +11,13 @@ const LoginPage = () => {
   const [email, setEmail] = useState("")
   const [senha, setSenha] = useState("")
   const [errorMessage, setErrorMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const navigate = useNavigate() // Hook para redirecionamento
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage("")
+    setIsLoading(true)
 
     try {
       const { error } = await supabase.auth.signInWithPassword({
@@ -25,11 +28,13 @@ const LoginPage = () => {
       if (error) {
         console.error("Erro ao fazer login:", error)
         setErrorMessage("Email ou senha incorretos.")
+        setIsLoading(false)
       } else {
         navigate("/dashboard") // Redireciona para a dashboard
       }
     } catch (err) {
       setErrorMessage("Ocorreu um erro inesperado. Tente novamente.")
+      setIsLoading(false)
     }
   }
 
@@ -79,12 +84,21 @@ const LoginPage = () => {
                     Esqueceu sua senha?
                   </Link>
                 </label>
-              </div>
-              {errorMessage && (
+              </div>              {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-              )}
-              <button type="submit" className="btn btn-primary w-full mt-6">
-                Entrar
+              )}              <button 
+                type="submit" 
+                className="btn btn-primary w-full mt-6"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Entrar
+                  </>
+                ) : (
+                  "Entrar"
+                )}
               </button>
             </form>
             <div className="text-center mt-4">

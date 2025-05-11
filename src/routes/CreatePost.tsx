@@ -217,8 +217,7 @@ export default function CreatePost() {
               </label>
             </div>
 
-            <div className="flex justify-between">
-              <button
+            <div className="flex justify-between">              <button
                 type="button"
                 onClick={() => navigate(`/c/${discriminador}`)}
                 className="btn btn-outline"
@@ -232,8 +231,8 @@ export default function CreatePost() {
               >
                 {isLoading ? (
                   <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Criando...
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Criar Postagem
                   </>
                 ) : (
                   "Criar Postagem"

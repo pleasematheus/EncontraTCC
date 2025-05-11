@@ -26,6 +26,7 @@ const CadastroPage = () => {
   const [confirmPassword, setConfirmPassword] = useState("")
   const [role, setRole] = useState<Role>("Discente")
   const [errorMessage, setErrorMessage] = useState("")
+  const [isLoading, setIsLoading] = useState(false)
   const [touched, setTouched] = useState({
     nome: false,
     email: false,
@@ -130,6 +131,7 @@ const CadastroPage = () => {
   const handleCadastro = async (e: React.FormEvent) => {
     e.preventDefault()
     setErrorMessage("")
+    setIsLoading(true)
 
     // Marcar todos os campos como tocados para exibir todos os erros
     setTouched({
@@ -150,6 +152,7 @@ const CadastroPage = () => {
       errors.confirmPassword.error
     ) {
       setErrorMessage("Por favor, corrija os erros no formulário.")
+      setIsLoading(false)
       return
     }
 
@@ -162,6 +165,7 @@ const CadastroPage = () => {
 
       if (authError) {
         setErrorMessage("Erro ao cadastrar: " + authError.message)
+        setIsLoading(false)
         return
       }
 
@@ -169,6 +173,7 @@ const CadastroPage = () => {
 
       if (!userId) {
         setErrorMessage("Não foi possível obter o ID do usuário.")
+        setIsLoading(false)
         return
       }
 
@@ -182,6 +187,7 @@ const CadastroPage = () => {
 
       if (insertError) {
         setErrorMessage("Erro ao salvar perfil: " + insertError.message)
+        setIsLoading(false)
         return
       }
 
@@ -190,6 +196,8 @@ const CadastroPage = () => {
     } catch (err: any) {
       console.error("Erro inesperado:", err)
       setErrorMessage("Erro inesperado. Tente novamente.")
+    } finally {
+      setIsLoading(false)
     }
   }
 
@@ -320,9 +328,19 @@ const CadastroPage = () => {
               </div>
               {errorMessage && (
                 <p className="text-red-500 text-sm mt-2">{errorMessage}</p>
-              )}
-              <button type="submit" className="btn btn-primary w-full mt-6">
-                Cadastrar
+              )}              <button
+                type="submit"
+                className="btn btn-primary w-full mt-6"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Cadastrar
+                  </>
+                ) : (
+                  "Cadastrar"
+                )}
               </button>
             </form>
             <div className="text-center mt-4">

@@ -266,14 +266,16 @@ const Profile = () => {
                   />
                 </div>
 
-                <div className="flex gap-2">
-                  <button
+                <div className="flex gap-2">                  <button
                     className="btn btn-primary flex-1"
                     onClick={handleChangePassword}
                     disabled={changingPassword}
                   >
                     {changingPassword ? (
-                      <span className="loading loading-spinner loading-sm"></span>
+                      <>
+                        <span className="loading loading-spinner loading-sm mr-2"></span>
+                        Salvar Nova Senha
+                      </>
                     ) : (
                       "Salvar Nova Senha"
                     )}
@@ -340,14 +342,16 @@ const Profile = () => {
                   </select>
                 </div>
 
-                <div className="flex gap-2">
-                  <button
+                <div className="flex gap-2">                  <button
                     className="btn btn-primary flex-1"
                     onClick={handleSaveChanges}
                     disabled={saving}
                   >
                     {saving ? (
-                      <span className="loading loading-spinner loading-sm"></span>
+                      <>
+                        <span className="loading loading-spinner loading-sm mr-2"></span>
+                        Salvar
+                      </>
                     ) : (
                       "Salvar"
                     )}

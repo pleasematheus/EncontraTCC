@@ -355,9 +355,8 @@ export default function Communities() {
                 }}
               >
                 Cancelar
-              </button>
-              <button
-                className={`btn btn-primary ${submitting ? "loading" : ""}`}
+              </button>              <button
+                className="btn btn-primary"
                 onClick={handleCreateCommunity}
                 disabled={
                   submitting ||
@@ -366,7 +365,14 @@ export default function Communities() {
                   !discriminador.trim()
                 }
               >
-                Criar
+                {submitting ? (
+                  <>
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Criar
+                  </>
+                ) : (
+                  "Criar"
+                )}
               </button>
             </div>
           </div>

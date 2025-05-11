@@ -268,8 +268,7 @@ export default function CommunityPage() {
               {community ? community.nome : "Carregando..."}
             </h1>
 
-            {userInfo.id && community && !loading && (
-              <button
+            {userInfo.id && community && !loading && (              <button
                 onClick={handleFollowToggle}
                 disabled={followLoading}
                 className={`btn ${
@@ -277,7 +276,10 @@ export default function CommunityPage() {
                 } flex items-center gap-2`}
               >
                 {followLoading ? (
-                  <span className="loading loading-spinner loading-sm"></span>
+                  <>
+                    <span className="loading loading-spinner loading-sm mr-1"></span>
+                    {isFollowing ? "Seguindo" : "Seguir"}
+                  </>
                 ) : isFollowing ? (
                   <>
                     <UserMinus size={18} /> Seguindo

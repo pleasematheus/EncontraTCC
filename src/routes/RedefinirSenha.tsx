@@ -172,17 +172,15 @@ const RedefinirSenha = () => {
                 >
                   <p>{message.text}</p>
                 </div>
-              )}
-
-              <button
+              )}              <button
                 type="submit"
                 className="btn btn-primary w-full mt-6"
                 disabled={loading}
               >
                 {loading ? (
                   <>
-                    <span className="loading loading-spinner loading-sm"></span>
-                    Processando...
+                    <span className="loading loading-spinner loading-sm mr-2"></span>
+                    Redefinir Senha
                   </>
                 ) : (
                   "Redefinir Senha"

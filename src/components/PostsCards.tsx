@@ -356,8 +356,7 @@ const PostCards = ({
             disabled={isLoading}
           >
             Cancelar
-          </button>
-          <button
+          </button>          <button
             type="button"
             onClick={handleDelete}
             className="btn btn-error btn-sm"
@@ -365,8 +364,8 @@ const PostCards = ({
           >
             {isLoading ? (
               <>
-                <span className="loading loading-spinner loading-xs"></span>
-                Excluindo...
+                <span className="loading loading-spinner loading-xs mr-2"></span>
+                Excluir
               </>
             ) : (
               "Excluir"
@@ -466,16 +465,15 @@ const PostCards = ({
               className="btn btn-outline btn-sm"
             >
               Cancelar
-            </button>
-            <button
+            </button>            <button
               type="submit"
               className="btn btn-primary btn-sm"
               disabled={isLoading}
             >
               {isLoading ? (
                 <>
-                  <span className="loading loading-spinner loading-xs"></span>
-                  Salvando...
+                  <span className="loading loading-spinner loading-xs mr-2"></span>
+                  Salvar
                 </>
               ) : (
                 "Salvar"
@@ -554,16 +552,15 @@ const PostCards = ({
                   className="btn btn-outline btn-sm"
                 >
                   Cancelar
-                </button>
-                <button
+                </button>                <button
                   type="submit"
                   className="btn btn-primary btn-sm"
                   disabled={isCandidaturaLoading}
                 >
                   {isCandidaturaLoading ? (
                     <>
-                      <span className="loading loading-spinner loading-xs"></span>
-                      Enviando...
+                      <span className="loading loading-spinner loading-xs mr-2"></span>
+                      Enviar Candidatura
                     </>
                   ) : (
                     "Enviar Candidatura"
@@ -636,16 +633,15 @@ const PostCards = ({
         userType === "Discente" &&
         isFollowing &&
         quantidadeUsuariosCandidatos < 3 && (
-          <div className="mt-4">
-            <button
+          <div className="mt-4">            <button
               onClick={handleCandidaturaModalOpen}
               className="btn btn-primary btn-sm"
               disabled={isCandidaturaLoading}
             >
               {isCandidaturaLoading ? (
                 <>
-                  <span className="loading loading-spinner loading-xs"></span>
-                  Candidatando...
+                  <span className="loading loading-spinner loading-xs mr-2"></span>
+                  Candidatar-se
                 </>
               ) : (
                 "Candidatar-se"
