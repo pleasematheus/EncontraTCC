@@ -106,11 +106,11 @@ export default function CreatePost() {
 
       if (error) {
         console.error("Erro ao criar postagem:", error)
-        setErrorMessage(`Erro ao criar postagem: ${error.message}`)
-      } else {
+        setErrorMessage(`Erro ao criar postagem: ${error.message}`)      } else {
         // A trigger no banco de dados já incrementará o contador de posts automaticamente
 
         setSuccessMessage("Postagem criada com sucesso!")
+        // Não desativamos o estado de loading, pois queremos manter o botão bloqueado até o redirecionamento
         setTimeout(() => {
           navigate(`/c/${discriminador}`)
         }, 2000)
@@ -118,7 +118,7 @@ export default function CreatePost() {
     } catch (error: any) {
       console.error("Erro inesperado:", error)
       setErrorMessage(`Ocorreu um erro inesperado: ${error.message}`)
-    } finally {
+      // Apenas desativa o loading em caso de erro
       setIsLoading(false)
     }
   }
