@@ -106,7 +106,8 @@ export default function CreatePost() {
 
       if (error) {
         console.error("Erro ao criar postagem:", error)
-        setErrorMessage(`Erro ao criar postagem: ${error.message}`)      } else {
+        setErrorMessage(`Erro ao criar postagem: ${error.message}`)
+      } else {
         // A trigger no banco de dados já incrementará o contador de posts automaticamente
 
         setSuccessMessage("Postagem criada com sucesso!")
