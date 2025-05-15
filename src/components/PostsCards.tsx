@@ -18,6 +18,7 @@ interface Post {
 
 interface CandidaturaData {
   universidade: string
+  curso: string
   semestre: string
   motivo: string
 }
@@ -53,6 +54,7 @@ const PostCards = ({
   const [showCandidaturaModal, setShowCandidaturaModal] = useState(false)
   const [candidaturaData, setCandidaturaData] = useState<CandidaturaData>({
     universidade: "",
+    curso: "",
     semestre: "",
     motivo: "",
   })
@@ -200,7 +202,6 @@ const PostCards = ({
       setIsLoading(false)
     }
   }
-
   const handleCandidaturaModalOpen = () => {
     setErrorMessage("")
     setShowCandidaturaModal(true)
@@ -210,6 +211,7 @@ const PostCards = ({
     setShowCandidaturaModal(false)
     setCandidaturaData({
       universidade: "",
+      curso: "",
       semestre: "",
       motivo: "",
     })
@@ -219,6 +221,13 @@ const PostCards = ({
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target
+
+    // Validação específica para o campo "semestre"
+    if (name === "semestre") {
+      // Permite apenas até 2 dígitos numéricos
+      if (!/^\d{0,2}$/.test(value)) return
+    }
+
     setCandidaturaData((prev) => ({
       ...prev,
       [name]: value,
@@ -261,7 +270,7 @@ const PostCards = ({
         await supabase
           .from("Candidaturas")
           .select("id")
-          .eq("id_postagem", post.id)
+          .eq("postagem_id", post.id)
           .eq("usuario_id", userData.id)
           .maybeSingle()
 
@@ -279,7 +288,7 @@ const PostCards = ({
       const { data: uniqueApplicants, error: countError } = await supabase
         .from("Candidaturas")
         .select("usuario_id")
-        .eq("id_postagem", post.id)
+        .eq("postagem_id", post.id)
 
       if (countError) throw countError
 
@@ -291,16 +300,15 @@ const PostCards = ({
         setErrorMessage("Esta postagem já atingiu o limite de 3 candidatos")
         setIsCandidaturaLoading(false)
         return
-      }
-
-      // Criar candidatura
+      } // Criar candidatura
       const { error } = await supabase.from("Candidaturas").insert([
         {
-          id_postagem: post.id,
+          postagem_id: post.id,
           usuario_id: userData.id,
           data_candidatura: new Date().toISOString(),
           status: "Pendente",
           universidade: candidaturaData.universidade,
+          curso: candidaturaData.curso,
           semestre: candidaturaData.semestre,
           motivo: candidaturaData.motivo,
         },
@@ -521,15 +529,54 @@ const PostCards = ({
 
               <div className="form-control mb-4">
                 <label className="label">
-                  <span className="label-text">Semestre atual</span>
+                  <span className="label-text">Curso</span>
                 </label>
                 <input
                   type="text"
+                  name="curso"
+                  placeholder="Informe seu curso"
+                  className="input input-bordered w-full"
+                  value={candidaturaData.curso}
+                  onChange={handleCandidaturaInputChange}
+                  required
+                />
+              </div>
+
+              <div className="form-control mb-4">
+                <label className="label">
+                  <span className="label-text">Semestre atual</span>
+                </label>
+                <input
+                  type="number"
+                  min={1}
+                  max={99}
+                  maxLength={2}
+                  minLength={1}
+                  step={1}
+                  inputMode="numeric"
                   name="semestre"
-                  placeholder="Ex: 5º semestre"
+                  placeholder="Ex: 5"
+                  pattern="[0-9]*"
                   className="input input-bordered w-full"
                   value={candidaturaData.semestre}
                   onChange={handleCandidaturaInputChange}
+                  onKeyDown={(e) => {
+                    // Permitir teclas de controle
+                    const allowedKeys = [
+                      "Backspace",
+                      "Tab",
+                      "ArrowLeft",
+                      "ArrowRight",
+                      "Delete",
+                    ]
+
+                    // Permitir números de 0 a 9
+                    const isNumberKey = /^[0-9]$/.test(e.key)
+
+                    if (!isNumberKey && !allowedKeys.includes(e.key)) {
+                      e.preventDefault()
+                    }
+                  }}
                   required
                 />
               </div>
@@ -540,7 +587,7 @@ const PostCards = ({
                 </label>
                 <textarea
                   name="motivo"
-                  placeholder="Explique porque você deseja se candidatar a esta vaga"
+                  placeholder="Explique porque você deseja se candidatar a esta vaga. Obs.: Inclua formas de contato para conversar com o docente posteriormente."
                   className="textarea textarea-bordered w-full h-24"
                   value={candidaturaData.motivo}
                   onChange={handleCandidaturaInputChange}
@@ -605,7 +652,7 @@ const PostCards = ({
       <p className="text-gray-700 mb-4">{post.descricao}</p>
       <div className="flex justify-between items-center">
         <small className="text-gray-500">
-          {formatDate(post.data_criacao)}
+          <span>Criação: {formatDate(post.data_criacao)}</span>
           {post.data_atualizacao &&
             post.data_atualizacao !== post.data_criacao && (
               <span className="ml-2">
@@ -629,7 +676,7 @@ const PostCards = ({
       {post.candidaturas_abertas && (
         <div className="mt-2 text-sm text-gray-600">
           <span className="font-medium">Pessoas candidatas: </span>
-          {quantidadeUsuariosCandidatos}/3
+          {quantidadeUsuariosCandidatos}
         </div>
       )}
 

@@ -128,9 +128,6 @@ const TrendingPosts = () => {
                     isFollowing={true} // Assumindo que são posts populares de comunidades que o usuário pode se interessar
                   />
                   <div className="mt-2 flex flex-col items-center">
-                    <span className="badge badge-primary mb-1">
-                      {post.candidaturas_count} candidaturas
-                    </span>
                     {post.comunidade_nome && (
                       <span className="text-sm text-gray-600">
                         Comunidade: {post.comunidade_nome}

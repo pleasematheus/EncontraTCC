@@ -66,7 +66,7 @@ FROM
   JOIN "Comunidades" c ON p."comunidade_id" = c."id"
   JOIN "Usuarios" u ON p."id_usuario_criador" = u."id"
   JOIN "usuario_comunidade" uc ON c."id" = uc."id_comunidade"
-  AND uc."tipo" = 'seguidor'
+  AND uc."tipo" in ('criador', 'seguidor')
 WHERE
   p."status" = 'Ativo'
 ORDER BY
