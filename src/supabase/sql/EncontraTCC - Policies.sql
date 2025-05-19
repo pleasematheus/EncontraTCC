@@ -109,7 +109,7 @@ CREATE POLICY "usuario_comunidade_unfollow" ON public."usuario_comunidade" FOR D
     WHERE
       id = id_usuario
   )
-  AND tipo = 'membro'
+  AND tipo = 'seguidor'
 );
 
 -- =============================================================================

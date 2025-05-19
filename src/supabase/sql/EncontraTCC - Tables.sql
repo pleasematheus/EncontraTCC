@@ -26,7 +26,7 @@ CREATE TABLE
     "descricao_vector" TSVECTOR,
     "id_usuario_criador" UUID NOT NULL,
     "total_posts" INTEGER DEFAULT 0,
-    "total_usuarios" INTEGER NOT NULL,
+    "total_usuarios" INTEGER NOT NULL DEFAULT 1,
     "data_criacao" TIMESTAMP NOT NULL DEFAULT NOW (),
     "data_atualizacao" TIMESTAMP,
     PRIMARY KEY ("id")
