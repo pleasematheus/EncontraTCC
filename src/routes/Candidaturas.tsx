@@ -241,9 +241,9 @@ export default function Candidaturas() {
         <Check size={12} /> Aprovado
       </span>
     ),
-    Rejeitado: (
+    "Não selecionado": (
       <span className="badge badge-error badge-sm gap-1">
-        <X size={12} /> Rejeitado
+        <X size={12} /> Não selecionado
       </span>
     ),
   }

@@ -258,13 +258,13 @@ const Dashboard = () => {
                             )}
                           </div>
 
-                          <div className="flex justify-between items-center mt-4">
+                          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-2">
                             <span className="text-sm">
                               Por {postagem.criador_nome}
                             </span>
-                            <div className="flex gap-2">
+                            <div className="flex flex-col sm:flex-row gap-2">
                               {postagem.candidaturas_abertas && (
-                                <span className="badge badge-success">
+                                <span className="badge badge-success text-xs sm:text-sm whitespace-nowrap">
                                   Aceita candidaturas
                                 </span>
                               )}

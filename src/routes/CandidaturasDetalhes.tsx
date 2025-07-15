@@ -199,7 +199,7 @@ export default function CandidaturasDetalhes() {
       (c) => c.status === "Aprovado"
     ).length
     const rejectedCount = candidaturas.filter(
-      (c) => c.status === "Rejeitado"
+      (c) => c.status === "Não selecionado"
     ).length
 
     return { pendingCount, approvedCount, rejectedCount }
@@ -240,7 +240,7 @@ export default function CandidaturasDetalhes() {
       setNotification({
         type: "success",
         message: `Candidatura ${
-          status === "Aprovado" ? "aprovada" : "rejeitada"
+          status === "Aprovado" ? "aprovada" : "não selecionada"
         } com sucesso!`,
       })
     } catch (error: any) {
@@ -277,9 +277,9 @@ export default function CandidaturasDetalhes() {
         <Check size={14} /> Aprovado
       </span>
     ),
-    Rejeitado: (
+    "Não selecionado": (
       <span className="badge badge-error gap-1">
-        <X size={14} /> Rejeitado
+        <X size={14} /> Não selecionado
       </span>
     ),
   }
@@ -352,7 +352,7 @@ export default function CandidaturasDetalhes() {
             )}
           </button>{" "}
           <button
-            onClick={() => updateCandidaturaStatus(candidatura.id, "Rejeitado")}
+            onClick={() => updateCandidaturaStatus(candidatura.id, "Não selecionado")}
             className="btn btn-error btn-sm gap-1 flex-1"
             disabled={!!actionLoading}
           >
@@ -469,7 +469,7 @@ export default function CandidaturasDetalhes() {
                 </span>
                 <span>
                   <span className="inline-block w-3 h-3 rounded-full bg-error mr-1"></span>
-                  Rejeitadas: {statusCounts.rejectedCount}
+                  Não selecionadas: {statusCounts.rejectedCount}
                 </span>
               </div>
             </div>

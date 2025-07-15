@@ -459,36 +459,38 @@ export default function CommunityPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-base-100 py-8">
-        <div className="max-w-screen-lg mx-auto px-4">
+      <div className="min-h-screen bg-base-100 py-4 sm:py-8">
+        <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
           {" "}
-          <div className="flex justify-between items-center mb-6">
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
             <div>
-              <h1 className="text-3xl font-bold">
+              <h1 className="text-2xl sm:text-3xl font-bold">
                 {community ? community.nome : "Carregando..."}
               </h1>
               {isCreator && (
-                <div className="badge badge-primary mt-2">
+                <div className="inline-block bg-primary text-primary-content px-3 py-2 rounded-lg text-sm font-medium mt-2">
                   Você é o criador desta comunidade
                 </div>
               )}
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
               {isCreator && community && (
-                <div className="flex items-center gap-2">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                   <button
                     onClick={openEditModal}
-                    className="btn btn-outline btn-info flex items-center gap-2"
+                    className="btn btn-outline btn-info flex items-center justify-center gap-2 btn-sm sm:btn-md"
                     title="Editar comunidade"
                   >
-                    <Pencil size={16} /> Editar
+                    <Pencil size={14} className="sm:w-4 sm:h-4" />
+                    <span className="sm:inline">Editar</span>
                   </button>
                   <button
                     onClick={() => setDeleteModalOpen(true)}
-                    className="btn btn-outline btn-error flex items-center gap-2"
+                    className="btn btn-outline btn-error flex items-center justify-center gap-2 btn-sm sm:btn-md"
                     title="Excluir comunidade"
                   >
-                    <Trash2 size={16} /> Excluir
+                    <Trash2 size={14} className="sm:w-4 sm:h-4" />
+                    <span className="sm:inline">Excluir</span>
                   </button>
                 </div>
               )}
@@ -502,7 +504,7 @@ export default function CommunityPage() {
                         ? "btn-primary cursor-not-allowed opacity-70"
                         : "btn-primary"
                       : "btn-outline btn-primary"
-                  } flex items-center gap-2`}
+                  } flex items-center justify-center gap-2 btn-sm sm:btn-md`}
                   title={
                     isCreator && isFollowing
                       ? "Você não pode deixar de seguir uma comunidade que você criou"
@@ -512,16 +514,24 @@ export default function CommunityPage() {
                   {followLoading ? (
                     <>
                       <span className="loading loading-spinner loading-sm mr-1"></span>
-                      {isFollowing ? "Seguindo" : "Seguir"}
+                      <span className="hidden sm:inline">
+                        {isFollowing ? "Seguindo" : "Seguir"}
+                      </span>
                     </>
                   ) : isFollowing ? (
                     <>
-                      <UserMinus size={18} />{" "}
-                      {isCreator ? "Criador" : "Seguindo"}
+                      <UserMinus
+                        size={16}
+                        className="sm:w-[18px] sm:h-[18px]"
+                      />
+                      <span className="hidden sm:inline">
+                        {isCreator ? "Criador" : "Seguindo"}
+                      </span>
                     </>
                   ) : (
                     <>
-                      <UserPlus size={18} /> Seguir
+                      <UserPlus size={16} className="sm:w-[18px] sm:h-[18px]" />
+                      <span className="hidden sm:inline">Seguir</span>
                     </>
                   )}
                 </button>
@@ -529,14 +539,20 @@ export default function CommunityPage() {
             </div>
           </div>{" "}
           {community && (
-            <div className="mb-6">
+            <div className="mb-6 p-4 bg-base-200 rounded-lg">
               {community.descricao && (
-                <p className="text-gray-600 mb-3">{community.descricao}</p>
+                <p className="text-base-content mb-3 text-sm sm:text-base">
+                  {community.descricao}
+                </p>
               )}
-              <div className="text-sm text-gray-600">
-                <p>Total de membros: {community.total_usuarios}</p>
-                <p className="mt-1">
-                  Total de postagens: {community.total_posts}
+              <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 text-xs sm:text-sm text-base-content/70">
+                <p>
+                  <span className="font-medium">Membros:</span>{" "}
+                  {community.total_usuarios}
+                </p>
+                <p>
+                  <span className="font-medium">Postagens:</span>{" "}
+                  {community.total_posts}
                 </p>
               </div>
             </div>
@@ -572,22 +588,25 @@ export default function CommunityPage() {
       </div>
       {/* Botão fixo para criar postagem (aparece somente para docentes que seguem a comunidade) */}
       {!loading && userInfo.tipo === "Docente" && isFollowing && (
-        <div className="fixed bottom-6 right-6 z-50">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
           <button
             onClick={handleCreatePost}
-            className="btn btn-primary shadow-lg flex items-center gap-2"
+            className="btn btn-primary shadow-lg flex items-center gap-2 btn-sm sm:btn-md"
           >
-            <PlusCircle size={18} />
-            Criar Postagem
+            <PlusCircle size={16} className="sm:w-[18px] sm:h-[18px]" />
+            <span className="hidden sm:inline">Criar Postagem</span>
+            <span className="sm:hidden">Criar</span>
           </button>
         </div>
       )}{" "}
       <Footer />
       {/* Modal de Edição de Comunidade */}
       {editModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
-            <h2 className="text-2xl font-bold mb-4">Editar Comunidade</h2>
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+          <div className="bg-base-100 p-4 sm:p-6 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+              Editar Comunidade
+            </h2>
             <div className="form-control mb-3">
               <label className="label">
                 <span className="label-text">Nome da Comunidade</span>
@@ -659,11 +678,12 @@ export default function CommunityPage() {
       )}
       {/* Modal de Exclusão de Comunidade */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
-          <div className="bg-base-100 p-6 rounded-lg shadow-xl max-w-md w-full">
-            {" "}
-            <h2 className="text-2xl font-bold mb-4">Excluir Comunidade</h2>
-            <p className="mb-6">
+        <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50 p-4">
+          <div className="bg-base-100 p-4 sm:p-6 rounded-lg shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">
+              Excluir Comunidade
+            </h2>
+            <p className="mb-6 text-sm sm:text-base">
               Tem certeza que deseja excluir a comunidade{" "}
               <strong>{community?.nome}</strong>?
               <br />
